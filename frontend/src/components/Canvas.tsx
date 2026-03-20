@@ -902,7 +902,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], onState
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [undo, redo, canMerge, mergeSelectedNodes, copyToClipboard, pasteFromClipboard, selectedNodeIds, clipboard, nodes.length, analyzing, handleAnalyze])
+  }, [undo, redo, canMerge, mergeSelectedNodes, copyToClipboard, pasteFromClipboard, selectedNodeIds, clipboard, nodes.length])
 
   // Auto-analyze whenever the topology or system parameters change
   useEffect(() => {
@@ -1250,11 +1250,6 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], onState
           backgroundColor: 'var(--bg-primary)'
         }}
       >
-        <ToolbarButton
-          label={analyzing ? 'Analyzing...' : 'Analyze'}
-          onClick={handleAnalyze}
-          disabled={analyzing || nodes.length === 0}
-        />
         {canMerge && (
           <ToolbarButton
             label="Merge"
