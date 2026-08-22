@@ -9,16 +9,20 @@ A full-stack system design visualizer with a React frontend (using React Flow) a
 ## Directory Structure
 
 ```
-├── frontend/          # React + TypeScript + Vite
+├── frontend/            # React + TypeScript + Vite
 │   └── src/
-│       ├── api/       # API client functions
-│       ├── components/  # React components (Canvas, Sidebar, TabBar)
-│       ├── nodes/     # Custom React Flow node types
-│       └── utils/     # Export utilities (Excalidraw, Mermaid, Image)
-├── api/               # Go + Gin
-│   ├── main.go          # Server entry
-│   ├── handler/         # HTTP handlers (validation rules)
-│   └── model/         # Data models
+│       ├── api/         # API client functions
+│       ├── components/  # React components (Canvas, Sidebar, TabBar, SettingsMenu)
+│       ├── hooks/       # useCanvasTabs (multi-tab state)
+│       ├── nodes/       # Custom React Flow node types
+│       ├── edges/       # Custom edge rendering
+│       ├── types/       # Shared topology types
+│       └── utils/       # Export utilities (Excalidraw, Mermaid, Image, PDF)
+├── _cmd/main.go         # Local dev server entry (:8080)
+├── api/topology.go      # Vercel serverless entry
+├── logic/               # Validation engine (check_*.go) + topology_handler.go
+├── model/               # Data models (topology, properties, protocols)
+└── docs/RULES.md        # Rule index
 ```
 
 ---
@@ -41,9 +45,10 @@ A full-stack system design visualizer with a React frontend (using React Flow) a
 
 | Command | Description |
 |---------|-------------|
-| `cd api && go run main.go` | Run backend server (localhost:8080) |
-| `cd api && go test ./...` | Run all tests |
-| `cd api && go fmt` | Format Go code |
+| `go run _cmd/main.go` | Run backend server (localhost:8080) |
+| `go build ./...` | Build check |
+| `go test ./...` | Run all tests |
+| `go fmt ./...` | Format Go code |
 
 ---
 
@@ -60,12 +65,13 @@ A full-stack system design visualizer with a React frontend (using React Flow) a
 
 ### Adding a New Validation Rule
 
-1. Add a new `check_*.go` file in `api/handler/`
+1. Add a new `check_*.go` file in `logic/` (or extend an existing category file)
 2. Implement the rule using `model.TopologyContext`
-3. Call the rule function in `handler.validate()` within `api/handler/topology_handler.go`
-4. Add corresponding tests in `api/handler/check_*_test.go`
+3. Call the rule function in `validate()` within `logic/topology_handler.go`
+4. Register the rule ID in `AllRuleNames` (`logic/warning.go`) so the "rules passed" counter stays correct
+5. Add corresponding tests in `logic/check_*_test.go` and a row in `docs/RULES.md`
 
 ### Adding a New Export Format
 
 1. Create an export utility in `frontend/src/utils/`
-2. Register the format in `frontend/src/components/ExportMenu.tsx`
+2. Register the format in the export view of `frontend/src/components/SettingsMenu.tsx`

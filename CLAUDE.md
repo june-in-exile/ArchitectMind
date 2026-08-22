@@ -21,12 +21,13 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 
 ## Architecture
 
-- **Analysis**: `POST /api/topology` sends nodes/edges to backend.
-- **Validation Rules**: Implemented in `logic/check_*.go`. Over 38 rules covering Availability, Performance, Security, etc.
-- **Frontend State**: Managed in `Canvas.tsx` (nodes/edges) with history for Undo. Multi-tab support via `useCanvasTabs`.
-- **Export**: Utilities in `src/utils/` for Excalidraw, Image, Mermaid, and PDF.
-- **Presets**: Standard Demo, Twitter, YouTube, and Google architectures available in the toolbar.
-- **Duplicate & Merge**: Support for cloning nodes and merging multiple components into a single role-based node.
+- **Analysis**: `POST /api/topology` sends nodes/edges (plus optional system params) to the backend. Triggered automatically from `Canvas.tsx` with an 800ms debounce whenever nodes or params change — there is no manual Analyze button.
+- **Backend Entry Points**: `_cmd/main.go` for local dev; `api/topology.go` for the Vercel serverless function. Both route to `logic.PostTopology`.
+- **Validation Rules**: Implemented in `logic/check_*.go`. 45 rules covering Availability, Performance, Security, Observability, and Capacity Planning. The canonical list lives in `logic.AllRuleNames` (`logic/warning.go`) and is documented in `docs/RULES.md`.
+- **Frontend State**: Managed in `Canvas.tsx` (nodes/edges) with undo/redo history. Multi-tab support via `useCanvasTabs`; sidebar visibility and theme live in `App.tsx`.
+- **Export**: Utilities in `src/utils/` for Excalidraw, Image, Mermaid, and PDF, wired up in `SettingsMenu.tsx`.
+- **Presets**: Basic, Twitter, YouTube, and Google architectures under the Demo dropdown in the canvas toolbar.
+- **Editing**: Duplicate (Shift+drag), Merge/Split of role-based nodes, copy/paste, select all, undo/redo — all keyboard-driven in `Canvas.tsx`.
 
 ## Adding Features
 
