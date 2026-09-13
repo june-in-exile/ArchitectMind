@@ -1,9 +1,11 @@
 import { expect, test } from '@playwright/test'
 import { cleanAnalysis } from './fixtures/analysis'
 import {
+  canvasEdges,
   canvasNodes,
   clickEmptyCanvas,
   dropComponent,
+  loadPreset,
   mockAnalysis,
   nodeIds,
   openApp,
@@ -110,6 +112,26 @@ test.describe('tabs', () => {
     await page.locator('input:focus').fill('   ')
     await page.keyboard.press('Enter')
     await expect(tabName).toBeVisible()
+  })
+
+  test('keeps nodes and edges independent per tab', async ({ page }) => {
+    await loadPreset(page, 'Basic')
+    await expect(canvasEdges(page)).toHaveCount(13)
+
+    await page.getByTitle('New canvas').click()
+    await expect(canvasNodes(page)).toHaveCount(0)
+    await expect(canvasEdges(page)).toHaveCount(0)
+
+    await loadPreset(page, 'Twitter')
+    await expect(canvasEdges(page)).toHaveCount(22)
+
+    await page.getByText('Untitled 1', { exact: true }).click()
+    await expect(canvasNodes(page)).toHaveCount(14)
+    await expect(canvasEdges(page)).toHaveCount(13)
+
+    await page.getByText('Untitled 2', { exact: true }).click()
+    await expect(canvasNodes(page)).toHaveCount(18)
+    await expect(canvasEdges(page)).toHaveCount(22)
   })
 })
 
