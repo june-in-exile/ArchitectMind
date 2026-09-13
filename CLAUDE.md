@@ -18,6 +18,8 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - `cd frontend && npm run dev` - Dev server on :5173
 - `cd frontend && npm run build` - Type-check and bundle
 - `cd frontend && npm run lint` - ESLint
+- `cd frontend && npm run test:e2e` - Playwright regression suite on the production build (Chromium + WebKit, API mocked)
+- `cd frontend && E2E_REAL_BACKEND=1 npx playwright test --project=real-backend` - Smoke test against the Go backend (port 8080 must be free)
 
 ## Architecture
 
@@ -28,6 +30,11 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - **Export**: Utilities in `src/utils/` for Excalidraw, Image, Mermaid, and PDF, wired up in `SettingsMenu.tsx`.
 - **Presets**: Basic, Twitter, YouTube, and Google architectures under the Demo dropdown in the canvas toolbar.
 - **Editing**: Duplicate (Shift+drag), Merge/Split of role-based nodes, copy/paste, select all, undo/redo — all keyboard-driven in `Canvas.tsx`.
+
+## E2E Regression Baseline
+
+- `frontend/e2e/` characterizes the existing desktop behavior. Do not edit these tests to make a change pass unless the change is listed in §9.3 of `docs/superpowers/specs/2026-09-13-pwa-canvas-persistence-design.md`, and explain it in the commit message.
+- Snapshot and screenshot baselines are generated on macOS (`*-darwin.*`). Regenerate them with `npx playwright test --update-snapshots` only for intentional changes, and review the new files before committing.
 
 ## Adding Features
 
