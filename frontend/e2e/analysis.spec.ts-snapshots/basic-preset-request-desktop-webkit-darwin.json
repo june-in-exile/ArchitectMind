@@ -1,0 +1,264 @@
+{
+  "id": "current-design",
+  "name": "Untitled Design",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "demo-client",
+      "componentType": "client",
+      "label": "Client",
+      "position": {
+        "x": 400,
+        "y": 50
+      },
+      "properties": {}
+    },
+    {
+      "id": "demo-dns",
+      "componentType": "dns",
+      "label": "DNS",
+      "position": {
+        "x": 700,
+        "y": 50
+      },
+      "properties": {}
+    },
+    {
+      "id": "demo-firewall",
+      "componentType": "firewall",
+      "label": "Firewall",
+      "position": {
+        "x": 400,
+        "y": 250
+      },
+      "properties": {
+        "mode": "inline"
+      }
+    },
+    {
+      "id": "demo-cdn",
+      "componentType": "cdn",
+      "label": "CDN",
+      "position": {
+        "x": 650,
+        "y": 450
+      },
+      "properties": {}
+    },
+    {
+      "id": "demo-lb",
+      "componentType": "load_balancer",
+      "label": "Load Balancer",
+      "position": {
+        "x": 400,
+        "y": 450
+      },
+      "properties": {
+        "algorithm": "round_robin",
+        "layer": "l7"
+      }
+    },
+    {
+      "id": "demo-reverse-proxy",
+      "componentType": "reverse_proxy",
+      "label": "Reverse Proxy",
+      "position": {
+        "x": 400,
+        "y": 650
+      },
+      "properties": {
+        "product": "nginx",
+        "sslTermination": true
+      }
+    },
+    {
+      "id": "demo-apigw",
+      "componentType": "api_gateway",
+      "label": "API Gateway",
+      "position": {
+        "x": 400,
+        "y": 850
+      },
+      "properties": {
+        "rateLimit": 1000,
+        "authEnabled": true
+      }
+    },
+    {
+      "id": "demo-service",
+      "componentType": "service",
+      "label": "Service",
+      "position": {
+        "x": 400,
+        "y": 1050
+      },
+      "properties": {
+        "replicas": 3
+      }
+    },
+    {
+      "id": "demo-mq",
+      "componentType": "message_queue",
+      "label": "Message Queue",
+      "position": {
+        "x": 700,
+        "y": 1050
+      },
+      "properties": {
+        "queueType": "kafka"
+      }
+    },
+    {
+      "id": "demo-db-master",
+      "componentType": "database",
+      "label": "Database",
+      "position": {
+        "x": 250,
+        "y": 1250
+      },
+      "properties": {
+        "dbType": "sql"
+      }
+    },
+    {
+      "id": "demo-db-slave",
+      "componentType": "database",
+      "label": "Database",
+      "position": {
+        "x": 450,
+        "y": 1250
+      },
+      "properties": {
+        "dbType": "sql"
+      }
+    },
+    {
+      "id": "demo-cache",
+      "componentType": "cache",
+      "label": "Cache",
+      "position": {
+        "x": 650,
+        "y": 1250
+      },
+      "properties": {
+        "cacheType": "distributed"
+      }
+    },
+    {
+      "id": "demo-storage",
+      "componentType": "storage",
+      "label": "Storage",
+      "position": {
+        "x": 850,
+        "y": 850
+      },
+      "properties": {}
+    },
+    {
+      "id": "demo-logger",
+      "componentType": "logger",
+      "label": "Logger",
+      "position": {
+        "x": 150,
+        "y": 1050
+      },
+      "properties": {
+        "logType": "all",
+        "retentionDays": 30
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-client-dns",
+      "source": "demo-client",
+      "target": "demo-dns",
+      "connectionType": "sync",
+      "protocol": "dns"
+    },
+    {
+      "id": "e-client-cdn",
+      "source": "demo-client",
+      "target": "demo-cdn",
+      "connectionType": "sync",
+      "protocol": "https"
+    },
+    {
+      "id": "e-client-firewall",
+      "source": "demo-client",
+      "target": "demo-firewall",
+      "connectionType": "sync",
+      "protocol": "https"
+    },
+    {
+      "id": "e-firewall-lb",
+      "source": "demo-firewall",
+      "target": "demo-lb",
+      "connectionType": "sync",
+      "protocol": "https"
+    },
+    {
+      "id": "e-cdn-storage",
+      "source": "demo-cdn",
+      "target": "demo-storage",
+      "connectionType": "sync",
+      "protocol": "https"
+    },
+    {
+      "id": "e-lb-proxy",
+      "source": "demo-lb",
+      "target": "demo-reverse-proxy",
+      "connectionType": "sync",
+      "protocol": "http"
+    },
+    {
+      "id": "e-proxy-apigw",
+      "source": "demo-reverse-proxy",
+      "target": "demo-apigw",
+      "connectionType": "sync",
+      "protocol": "http"
+    },
+    {
+      "id": "e-apigw-service",
+      "source": "demo-apigw",
+      "target": "demo-service",
+      "connectionType": "sync",
+      "protocol": "http"
+    },
+    {
+      "id": "e-service-mq",
+      "source": "demo-service",
+      "target": "demo-mq",
+      "connectionType": "async",
+      "protocol": "amqp"
+    },
+    {
+      "id": "e-service-dbm",
+      "source": "demo-service",
+      "target": "demo-db-master",
+      "connectionType": "sync",
+      "protocol": "database"
+    },
+    {
+      "id": "e-service-dbs",
+      "source": "demo-service",
+      "target": "demo-db-slave",
+      "connectionType": "sync",
+      "protocol": "database"
+    },
+    {
+      "id": "e-service-cache",
+      "source": "demo-service",
+      "target": "demo-cache",
+      "connectionType": "sync",
+      "protocol": "resp"
+    },
+    {
+      "id": "e-service-logger",
+      "source": "demo-service",
+      "target": "demo-logger",
+      "connectionType": "async",
+      "protocol": "http"
+    }
+  ]
+}
