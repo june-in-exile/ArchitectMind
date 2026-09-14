@@ -24,6 +24,7 @@ import ToolbarButton from './ToolbarButton'
 import SettingsMenu from './SettingsMenu'
 import { NODE_TYPE_CONFIG } from '../nodes/nodeConfig'
 import { analyzeTopology } from '../api/topologyApi'
+import { generateNodeId } from '../utils/nodeId'
 import type {
   ComponentType,
   SystemTopology,
@@ -38,12 +39,6 @@ const nodeTypes = {
 
 const edgeTypes = {
   handdrawn: HandDrawnEdge,
-}
-
-let nodeIdCounter = 0
-function generateNodeId(): string {
-  nodeIdCounter += 1
-  return `node-${nodeIdCounter}`
 }
 
 interface CanvasProps {
