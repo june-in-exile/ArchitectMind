@@ -4,6 +4,9 @@ import type { AnalysisFixture } from '../fixtures/analysis'
 export const ANALYSIS_SETTLE_MS = 1500
 const FIT_VIEW_START_MS = 100
 const VIEWPORT_SAMPLE_GAP_MS = 150
+// `serviceWorkers: 'block'` replaces navigator.serviceWorker.register with a Playwright
+// stub that logs this warning; it comes from the test runner, not from the app.
+const PLAYWRIGHT_SW_BLOCK_WARNING = 'Service Worker registration blocked by Playwright'
 
 export const BACKEND_ERROR_SOLUTION = 'Please ensure the backend service is running and try again.'
 
@@ -64,7 +67,8 @@ export async function nodeIds(page: Page): Promise<string[]> {
 export function collectConsoleProblems(page: Page): () => readonly string[] {
   let problems: readonly string[] = []
   page.on('console', (message) => {
-    if (message.type() === 'error' || message.type() === 'warning') {
+    const isProblem = message.type() === 'error' || message.type() === 'warning'
+    if (isProblem && message.text() !== PLAYWRIGHT_SW_BLOCK_WARNING) {
       problems = [...problems, `${message.type()}: ${message.text()}`]
     }
   })
