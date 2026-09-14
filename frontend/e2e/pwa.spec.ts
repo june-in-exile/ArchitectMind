@@ -1,9 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { cleanAnalysis } from './fixtures/analysis'
-import { mockAnalysis, openApp } from './support/app'
+import { isHandFontLoaded, mockAnalysis, openApp } from './support/app'
 
 const GOOGLE_FONTS_HOSTS = /fonts\.(googleapis|gstatic)\.com/
-const HAND_FONT_FAMILY = 'Caveat Variable'
 
 test.beforeEach(async ({ page }) => {
   await mockAnalysis(page, cleanAnalysis)
@@ -57,12 +56,7 @@ test('self-hosts the hand-drawn font', async ({ page }) => {
   })
 
   await openApp(page)
-  const handFontLoaded = await page.evaluate(async (family) => {
-    await document.fonts.ready
-    return [...document.fonts].some(
-      (face) => face.family.replace(/["']/g, '') === family && face.status === 'loaded',
-    )
-  }, HAND_FONT_FAMILY)
+  const handFontLoaded = await isHandFontLoaded(page)
 
   expect(handFontLoaded).toBe(true)
   expect(googleFontRequests).toEqual([])

@@ -1,4 +1,4 @@
-import { expect, type Download, type Locator, type Page } from '@playwright/test'
+import { expect, test, type Download, type Locator, type Page } from '@playwright/test'
 import type { AnalysisFixture } from '../fixtures/analysis'
 
 export const ANALYSIS_SETTLE_MS = 1500
@@ -49,7 +49,16 @@ export async function mockAnalysis(page: Page, response: AnalysisFixture): Promi
 
 export async function openApp(page: Page): Promise<void> {
   await page.goto('/')
+  if (test.info().project.use.serviceWorkers === 'allow') {
+    await waitForServiceWorkerControl(page)
+  }
   await expect(page.getByText('Untitled 1', { exact: true })).toBeVisible()
+}
+
+async function waitForServiceWorkerControl(page: Page): Promise<void> {
+  await page.evaluate(() => navigator.serviceWorker.ready.then(() => undefined))
+  await page.reload()
+  await expect.poll(() => page.evaluate(() => navigator.serviceWorker.controller !== null)).toBe(true)
 }
 
 export const canvasNodes = (page: Page): Locator => page.locator('.react-flow__node')
@@ -174,4 +183,13 @@ export async function downloadedFilePath(download: Download): Promise<string> {
   const path = await download.path()
   if (!path) throw new Error(`Download failed: ${download.suggestedFilename()}`)
   return path
+}
+
+export async function isHandFontLoaded(page: Page): Promise<boolean> {
+  return page.evaluate(async () => {
+    await document.fonts.ready
+    return [...document.fonts].some(
+      (face) => face.family.replace(/["']/g, '') === 'Caveat Variable' && face.status === 'loaded',
+    )
+  })
 }
