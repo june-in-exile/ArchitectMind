@@ -72,6 +72,7 @@ test('undo and redo revert and reapply a label edit', async ({ page }) => {
 
   await page.keyboard.press('ControlOrMeta+z')
   await expect(service).not.toContainText('Order Service')
+  await expect(canvasNodes(page)).toHaveCount(14)
   await page.waitForTimeout(SHORTCUT_REBIND_MS)
 
   await page.keyboard.press('ControlOrMeta+Shift+z')

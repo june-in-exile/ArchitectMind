@@ -4,6 +4,7 @@ import { cleanAnalysis } from './fixtures/analysis'
 import {
   PRESET_COUNTS,
   canvasEdges,
+  canvasNodes,
   downloadedFilePath,
   exportAs,
   loadPreset,
@@ -26,6 +27,7 @@ test.describe('presets', () => {
     }) => {
       await loadPreset(page, preset)
 
+      await expect(canvasNodes(page)).toHaveCount(PRESET_COUNTS[preset].nodes)
       await expect(canvasEdges(page)).toHaveCount(PRESET_COUNTS[preset].edges)
     })
   }

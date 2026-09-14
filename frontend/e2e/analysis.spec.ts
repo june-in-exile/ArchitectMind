@@ -80,6 +80,8 @@ test.describe('auto analysis', () => {
     await message.click()
 
     await expect.poll(() => viewport.getAttribute('style')).not.toBe(before)
+    await expect(page.getByText('Component Properties')).toBeVisible()
+    await expect(page.locator('label:text-is("Label") + input')).toHaveValue('Service')
   })
 
   test('clears the results after every node is deleted', async ({ page }) => {
