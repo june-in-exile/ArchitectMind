@@ -37,7 +37,7 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - Snapshot and screenshot baselines are generated on macOS (`*-darwin.*`). Regenerate them with `npx playwright test --update-snapshots` only for intentional changes, and review the new files before committing.
 - First-time setup: `cd frontend && npx playwright install chromium webkit`.
 - The suite builds the app and starts its own `vite preview` on port 4173 and never reuses an existing server, so stop anything else listening on 4173 first.
-- The hand-drawn font (Caveat) still loads from Google Fonts, so the screenshot tests need network access.
+- The hand-drawn font (Caveat) is self-hosted through `@fontsource-variable/caveat` and precached by the service worker, so the suite does not need network access for fonts.
 
 ## Adding Features
 
