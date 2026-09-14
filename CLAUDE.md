@@ -35,6 +35,9 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 
 - `frontend/e2e/` characterizes the existing desktop behavior. Do not edit these tests to make a change pass unless the change is listed in §9.3 of `docs/superpowers/specs/2026-09-13-pwa-canvas-persistence-design.md`, and explain it in the commit message.
 - Snapshot and screenshot baselines are generated on macOS (`*-darwin.*`). Regenerate them with `npx playwright test --update-snapshots` only for intentional changes, and review the new files before committing.
+- First-time setup: `cd frontend && npx playwright install chromium webkit`.
+- The suite builds the app and starts its own `vite preview` on port 4173 and never reuses an existing server, so stop anything else listening on 4173 first.
+- The hand-drawn font (Caveat) still loads from Google Fonts, so the screenshot tests need network access.
 
 ## Adding Features
 
