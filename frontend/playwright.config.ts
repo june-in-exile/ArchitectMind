@@ -51,7 +51,8 @@ export default defineConfig({
     {
       command: 'npm run build && npm run preview -- --port 4173 --strictPort',
       url: PREVIEW_URL,
-      reuseExistingServer: !process.env.CI,
+      // Never test whatever already listens on 4173: it may be a stale build or another project.
+      reuseExistingServer: false,
       timeout: 180_000,
     },
     ...(REAL_BACKEND
