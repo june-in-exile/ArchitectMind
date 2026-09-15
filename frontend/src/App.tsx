@@ -3,24 +3,32 @@ import type { Edge, Node } from '@xyflow/react'
 import Sidebar from './components/Sidebar'
 import Canvas from './components/Canvas'
 import TabBar from './components/TabBar'
+import PersistenceNotice from './components/PersistenceNotice'
 import { useCanvasTabs } from './hooks/useCanvasTabs'
+import { getBrowserStorage } from './persistence/workspaceStorage'
+import { syncThemeColor } from './theme/themeColor'
+import { readThemePreference, writeThemePreference, type Theme } from './theme/themePreference'
 import type { SystemParams } from './types/topology'
+
+function reloadPage(): void {
+  window.location.reload()
+}
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-  const [theme, setTheme] = useState<'light' | 'dark' | 'warm' | 'dream' | 'cyberpunk'>(() => {
-    const saved = localStorage.getItem('theme') as 'light' | 'dark' | 'warm' | 'dream' | 'cyberpunk'
-    if (saved) return saved
-    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-  })
+  const [storage] = useState(() => getBrowserStorage())
+  const [theme, setTheme] = useState<Theme>(() =>
+    readThemePreference(storage, window.matchMedia('(prefers-color-scheme: dark)').matches)
+  )
 
   useEffect(() => {
     document.documentElement.classList.remove('dark', 'warm', 'dream', 'cyberpunk')
     if (theme !== 'light') {
       document.documentElement.classList.add(theme)
     }
-    localStorage.setItem('theme', theme)
-  }, [theme])
+    writeThemePreference(storage, theme)
+    syncThemeColor()
+  }, [theme, storage])
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -42,6 +50,9 @@ function App() {
     closeTab,
     renameTab,
     updateCanvasStateRef,
+    saveError,
+    persistenceBlocked,
+    restoreFailed,
   } = useCanvasTabs()
 
   const handleCanvasStateChange = useCallback(
@@ -85,6 +96,12 @@ function App() {
           onStateChange={handleCanvasStateChange}
         />
       </div>
+      <PersistenceNotice
+        persistenceBlocked={persistenceBlocked}
+        saveError={saveError}
+        restoreFailed={restoreFailed}
+        onReload={reloadPage}
+      />
     </div>
   )
 }
