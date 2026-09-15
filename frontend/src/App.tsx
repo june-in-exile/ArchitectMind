@@ -6,6 +6,8 @@ import TabBar from './components/TabBar'
 import PersistenceNotice from './components/PersistenceNotice'
 import PwaUpdatePrompt from './components/PwaUpdatePrompt'
 import { useCanvasTabs } from './hooks/useCanvasTabs'
+import { selectNotice } from './notices/selectNotice'
+import { useDismissibleNotice } from './notices/useDismissibleNotice'
 import { getBrowserStorage } from './persistence/workspaceStorage'
 import { syncThemeColor } from './theme/themeColor'
 import { readThemePreference, writeThemePreference, type Theme } from './theme/themePreference'
@@ -56,6 +58,10 @@ function App() {
     persistenceBlocked,
     restoreFailed,
   } = useCanvasTabs()
+  // Held here rather than in PersistenceNotice, which PwaUpdatePrompt unmounts while an update is offered.
+  const { visibleKind: noticeKind, dismiss: dismissNotice } = useDismissibleNotice(
+    selectNotice({ persistenceBlocked, saveError, restoreFailed })
+  )
 
   const handleCanvasStateChange = useCallback(
     (nodes: Node[], edges: Edge[], params: SystemParams) => {
@@ -101,14 +107,7 @@ function App() {
       </div>
       <PwaUpdatePrompt
         onBeforeUpdate={flush}
-        fallback={
-          <PersistenceNotice
-            persistenceBlocked={persistenceBlocked}
-            saveError={saveError}
-            restoreFailed={restoreFailed}
-            onReload={reloadPage}
-          />
-        }
+        fallback={<PersistenceNotice kind={noticeKind} onDismiss={dismissNotice} onReload={reloadPage} />}
       />
     </div>
   )

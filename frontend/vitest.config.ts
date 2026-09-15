@@ -26,6 +26,7 @@ export default defineConfig({
         'src/components/Toast.tsx',
         'src/components/PersistenceNotice.tsx',
         'src/notices/selectNotice.ts',
+        'src/notices/useDismissibleNotice.ts',
         'src/theme/themePreference.ts',
       ],
       exclude: ['src/**/*.test.{ts,tsx}'],
