@@ -146,6 +146,25 @@ describe('useWorkspacePersistence', () => {
     expect(result).toEqual({ ok: false, reason: 'unavailable' })
   })
 
+  it('stops writing as soon as a mounted hook becomes blocked', () => {
+    const { hook, storage } = render()
+    const setItem = vi.spyOn(storage, 'setItem')
+    current = workspace('Two')
+
+    hook.rerender({
+      storage,
+      blocked: 'newer-version',
+      initialJson: JSON.stringify(workspace('One')),
+      getWorkspace: () => current,
+    })
+    act(() => {
+      hook.result.current.flush()
+    })
+    hook.unmount()
+
+    expect(setItem).not.toHaveBeenCalled()
+  })
+
   it('writes pending changes when it unmounts', () => {
     const { hook, storage } = render()
     current = workspace('Two')

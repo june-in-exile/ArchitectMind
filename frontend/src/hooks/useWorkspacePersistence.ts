@@ -30,10 +30,14 @@ export function useWorkspacePersistence({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const persistRequestedRef = useRef(false)
   const getWorkspaceRef = useRef(getWorkspace)
+  const blockedRef = useRef(blocked)
+  const storageRef = useRef(storage)
 
   useEffect(() => {
     getWorkspaceRef.current = getWorkspace
-  }, [getWorkspace])
+    blockedRef.current = blocked
+    storageRef.current = storage
+  }, [getWorkspace, blocked, storage])
 
   const cancelPendingSave = useCallback(() => {
     if (timerRef.current !== null) {
@@ -43,13 +47,13 @@ export function useWorkspacePersistence({
   }, [])
 
   const writeIfChanged = useCallback((): SaveResult => {
-    if (blocked === 'unavailable') return { ok: false, reason: 'unavailable' }
-    if (blocked !== null) return { ok: false, reason: 'blocked' }
+    if (blockedRef.current === 'unavailable') return { ok: false, reason: 'unavailable' }
+    if (blockedRef.current !== null) return { ok: false, reason: 'blocked' }
 
     const json = JSON.stringify(getWorkspaceRef.current())
     if (json === lastPersistedJsonRef.current) return { ok: true }
 
-    const result = saveWorkspace(storage, json)
+    const result = saveWorkspace(storageRef.current, json)
     if (result.ok) {
       lastPersistedJsonRef.current = json
       if (!persistRequestedRef.current) {
@@ -58,7 +62,7 @@ export function useWorkspacePersistence({
       }
     }
     return result
-  }, [blocked, storage])
+  }, [])
 
   const flush = useCallback((): SaveResult => {
     cancelPendingSave()
