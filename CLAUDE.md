@@ -4,6 +4,8 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 
 **Deployment:** [https://architect-mind.vercel.app/](https://architect-mind.vercel.app/)
 
+**PWA deployment rules:** Never use Vercel Instant Rollback to a deployment from before the PWA — its `/sw.js` is rewritten to `index.html`, so users stay on the cached version; revert and redeploy instead. To remove the PWA, first deploy `VitePWA({ selfDestroying: true })` and wait before removing the plugin. Keep `POST /api/topology` compatible with the previous frontend, because installed apps can keep running an older version.
+
 ## Commands
 
 ### Backend (Go + Gin)
@@ -18,7 +20,9 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - `cd frontend && npm run dev` - Dev server on :5173
 - `cd frontend && npm run build` - Type-check and bundle
 - `cd frontend && npm run lint` - ESLint
-- `cd frontend && npm run test:e2e` - Playwright regression suite on the production build (Chromium + WebKit, API mocked)
+- `cd frontend && npm test` - Vitest unit tests
+- `cd frontend && npm run test:coverage` - Unit tests with the 80% coverage threshold
+- `cd frontend && npm run test:e2e` - Playwright regression suite on the production build (Chromium with and without a service worker, and WebKit; API mocked)
 - `cd frontend && E2E_REAL_BACKEND=1 npx playwright test --project=real-backend` - Smoke test against the Go backend (port 8080 must be free)
 
 ## Architecture
@@ -26,7 +30,8 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - **Analysis**: `POST /api/topology` sends nodes/edges (plus optional system params) to the backend. Triggered automatically from `Canvas.tsx` with an 800ms debounce whenever nodes or params change — there is no manual Analyze button.
 - **Backend Entry Points**: `_cmd/main.go` for local dev; `api/topology.go` for the Vercel serverless function. Both route to `logic.PostTopology`.
 - **Validation Rules**: Implemented in `logic/check_*.go`. 45 rules covering Availability, Performance, Security, Observability, and Capacity Planning. The canonical list lives in `logic.AllRuleNames` (`logic/warning.go`) and is documented in `docs/RULES.md`.
-- **Frontend State**: Managed in `Canvas.tsx` (nodes/edges) with undo/redo history. Multi-tab support via `useCanvasTabs`; sidebar visibility and theme live in `App.tsx`.
+- **Frontend State**: Managed in `Canvas.tsx` (nodes, edges, system params) with undo/redo history. Multi-tab support via `useCanvasTabs`, which restores every tab from localStorage (`architectmind:workspace`) and saves changes through `src/persistence/` and `useWorkspacePersistence` (500 ms debounce, writes only when the workspace changed). Sidebar visibility and theme live in `App.tsx`.
+- **PWA**: `vite-plugin-pwa` (prompt mode) precaches the build and the self-hosted Caveat font; `PwaUpdatePrompt` asks before activating a new version, and auto analysis pauses while offline.
 - **Export**: Utilities in `src/utils/` for Excalidraw, Image, Mermaid, and PDF, wired up in `SettingsMenu.tsx`.
 - **Presets**: Basic, Twitter, YouTube, and Google architectures under the Demo dropdown in the canvas toolbar.
 - **Editing**: Duplicate (Shift+drag), Merge/Split of role-based nodes, copy/paste, select all, undo/redo — all keyboard-driven in `Canvas.tsx`.

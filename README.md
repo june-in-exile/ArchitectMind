@@ -13,6 +13,8 @@ ArchitectMind is a web-based tool for visualizing and analyzing system architect
 - **Real-time Architecture Validation**: Analysis runs automatically (debounced) whenever the topology or system parameters change — no manual trigger needed. 45 automated rules check whether component types and connection logic align with system design best practices, with a live `N/45 rules passed` indicator.
 - **Custom Analysis Parameters**: Set system parameters like DAU, QPS, Storage, and Availability targets in the draggable/resizable **Params** panel to generate more precise capacity planning recommendations.
 - **Multi-tab Support**: Open multiple design canvases simultaneously for architecture comparison and multi-project workflows.
+- **Auto-save**: Every tab, its canvas, and its system parameters are saved in your browser and restored when you come back.
+- **Installable & Offline-ready (PWA)**: Install ArchitectMind as an app; it opens offline, and analysis resumes when the connection returns.
 - **One-click Presets**: Classic system design templates (Basic, Twitter, YouTube, Google) to help you get started quickly.
 - **Export Capabilities**: Supports exporting to Excalidraw, PNG, Mermaid, and PDF formats.
 - **Quick Operations**: **Duplicate** (Shift + drag), **Merge/Split** of role-based nodes, **Undo/Redo**, **Copy/Paste**, and **Select All**.
@@ -63,10 +65,17 @@ After starting:
 
 ## ✅ Tests
 
-Tests are currently focused on the backend. Run them in the root directory:
+Backend tests run in the root directory:
 
 ```bash
 go test ./... -v
+```
+
+Frontend tests run in `frontend/`:
+
+```bash
+npm test            # Vitest unit tests
+npm run test:e2e    # Playwright regression suite (run `npx playwright install chromium webkit` once first)
 ```
 
 ## 🔍 Validation Rule Examples
