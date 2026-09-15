@@ -34,12 +34,20 @@ export function createEmptyTab(name: string): CanvasTab {
   return { id: generateTabId(), name, nodes: [], edges: [], params: {} }
 }
 
-function toCanvasTab(tab: PersistedTab): CanvasTab {
+type PersistedNode = PersistedTab['nodes'][number]
+
+function toCanvasNode(node: PersistedNode): Node {
+  // React Flow spreads domAttributes onto the node's DOM element and the app never sets it, so drop a stored one.
+  const entries = Object.entries(node).filter(([key]) => key !== 'domAttributes')
   // workspaceSchema validated id, position and data; React Flow takes the other stored fields as they are.
+  return Object.fromEntries(entries) as unknown as Node
+}
+
+function toCanvasTab(tab: PersistedTab): CanvasTab {
   return {
     id: tab.id,
     name: tab.name,
-    nodes: tab.nodes as unknown as Node[],
+    nodes: tab.nodes.map(toCanvasNode),
     edges: tab.edges as unknown as Edge[],
     params: tab.params,
   }

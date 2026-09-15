@@ -1,4 +1,4 @@
-import { classifyVersion, workspaceSchema, type PersistedWorkspace } from './workspaceSchema'
+import { classifyVersion, usesKnownComponentTypes, workspaceSchema, type PersistedWorkspace } from './workspaceSchema'
 
 export const WORKSPACE_STORAGE_KEY = 'architectmind:workspace'
 export const CORRUPT_BACKUP_KEY = 'architectmind:workspace:corrupt'
@@ -62,8 +62,9 @@ export function loadWorkspace(storage: Storage | null): LoadResult {
   if (version === 'newer') return { status: 'unsupported-version' }
 
   const parsed = version === 'current' ? workspaceSchema.safeParse(candidate) : null
-  if (parsed?.success) return { status: 'loaded', workspace: parsed.data }
-  return { status: 'corrupt', backedUp: backUp(storage, raw) }
+  if (!parsed?.success) return { status: 'corrupt', backedUp: backUp(storage, raw) }
+  if (!usesKnownComponentTypes(parsed.data)) return { status: 'unsupported-version' }
+  return { status: 'loaded', workspace: parsed.data }
 }
 
 function isQuotaError(error: unknown): boolean {

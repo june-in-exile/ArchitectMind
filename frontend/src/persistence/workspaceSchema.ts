@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { NODE_TYPE_CONFIG } from '../nodes/nodeConfig'
 import type { SystemParams } from '../types/topology'
 
 export const WORKSPACE_VERSION = 1
@@ -59,6 +60,23 @@ export const workspaceSchema = z
 
 export type PersistedWorkspace = z.output<typeof workspaceSchema>
 export type PersistedTab = PersistedWorkspace['tabs'][number]
+
+const knownComponentTypeSchema = z.string().refine((value) => Object.hasOwn(NODE_TYPE_CONFIG, value))
+
+const knownComponentDataSchema = z.object({
+  componentType: knownComponentTypeSchema,
+  roles: z.array(knownComponentTypeSchema).optional(),
+})
+
+/**
+ * Node rendering looks up NODE_TYPE_CONFIG by componentType and by each role, so a workspace that uses
+ * a component type this build does not know (saved by a newer release, spec §6.4) cannot be restored.
+ */
+export function usesKnownComponentTypes(workspace: PersistedWorkspace): boolean {
+  return workspace.tabs.every((tab) =>
+    tab.nodes.every((node) => knownComponentDataSchema.safeParse(node.data).success),
+  )
+}
 
 export type VersionStatus = 'current' | 'newer' | 'invalid'
 

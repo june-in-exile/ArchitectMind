@@ -7,7 +7,7 @@ import { generateNodeId } from '../utils/nodeId'
 import { SAVE_DEBOUNCE_MS } from './useWorkspacePersistence'
 import { useCanvasTabs } from './useCanvasTabs'
 
-const node = (id: string): Node => ({ id, position: { x: 0, y: 0 }, data: { label: id } })
+const node = (id: string): Node => ({ id, position: { x: 0, y: 0 }, data: { label: id, componentType: 'service' } })
 
 const storedWorkspace = (nodeId: string) =>
   JSON.stringify(
