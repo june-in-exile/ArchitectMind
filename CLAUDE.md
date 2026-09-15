@@ -46,5 +46,6 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 
 ## Adding Features
 
-- **New Component**: Update `model/topology.go`, `model/properties.go`, `frontend/src/types/topology.ts`, and `frontend/src/nodes/nodeConfig.ts`.
+- **New Component**: Update `model/topology.go`, `model/properties.go`, `frontend/src/types/topology.ts`, and `frontend/src/nodes/nodeConfig.ts`. A saved workspace that contains a component type unknown to the running build is treated as saved by a newer version (not restored, not overwritten).
+- **New System Parameter**: Update `SystemParams` in `frontend/src/types/topology.ts` and `paramsObjectSchema` in `frontend/src/persistence/workspaceSchema.ts`. Otherwise the type assertion in `workspaceSchema.test.ts` fails `npm run build` (`npm test` does not type-check, so it still passes).
 - **New Rule**: Add `check_newrule.go` in `logic/`, register in `logic/topology_handler.go`, and add a test.
