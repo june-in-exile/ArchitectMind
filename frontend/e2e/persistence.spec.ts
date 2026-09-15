@@ -11,6 +11,7 @@ import {
   nodeIds,
   openApp,
   readDau,
+  readStoredWorkspace,
   setDau,
   storedNodeCounts,
 } from './support/app'
@@ -22,6 +23,11 @@ async function deleteAndUndoLogger(page: Page): Promise<void> {
   await page.waitForTimeout(SHORTCUT_REBIND_MS)
   await page.keyboard.press('ControlOrMeta+z')
   await expect(canvasNodes(page)).toHaveCount(14)
+}
+
+async function storedActiveTabName(page: Page): Promise<string | undefined> {
+  const workspace = await readStoredWorkspace(page)
+  return workspace?.tabs.find((tab) => tab.id === workspace.activeTabId)?.name
 }
 
 test.beforeEach(async ({ page }) => {
@@ -37,15 +43,33 @@ test('restores tabs, canvas content, params and the active tab after a reload', 
   await expect(canvasNodes(page)).toHaveCount(1)
   await page.getByText('Untitled 1', { exact: true }).click()
   await expect(canvasNodes(page)).toHaveCount(14)
+  await page.getByText('Untitled 2', { exact: true }).click()
+  await expect(canvasNodes(page)).toHaveCount(1)
   await expect.poll(() => storedNodeCounts(page)).toEqual([14, 1])
+  await expect.poll(() => storedActiveTabName(page)).toBe('Untitled 2')
 
   await page.reload()
 
   await expect(page.getByText('Untitled 2', { exact: true })).toBeVisible()
+  await expect(canvasNodes(page)).toHaveCount(1)
+  await page.getByText('Untitled 1', { exact: true }).click()
   await expect(canvasNodes(page)).toHaveCount(14)
   await expect(canvasEdges(page)).toHaveCount(13)
   expect(await readDau(page)).toBe('1000000')
-  await page.getByText('Untitled 2', { exact: true }).click()
+})
+
+test('keeps an edit made right before a reload', async ({ page }) => {
+  await dropComponent(page, 'service', 300, 200)
+  await expect(nodeById(page, 'node-1')).toBeVisible()
+  // Two animation frames let React run its passive effects as it would for a real user. The 500 ms save
+  // debounce is still pending, so only the pagehide/visibilitychange flush can keep this edit.
+  await page.evaluate(
+    () => new Promise<void>((resolve) => requestAnimationFrame(() => requestAnimationFrame(() => resolve()))),
+  )
+
+  await page.reload()
+
+  await expect(nodeById(page, 'node-1')).toBeVisible()
   await expect(canvasNodes(page)).toHaveCount(1)
 })
 
