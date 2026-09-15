@@ -93,6 +93,7 @@ function App() {
           initialNodes={[...activeTab.nodes]}
           initialEdges={[...activeTab.edges]}
           initialParams={activeTab.params}
+          persistenceHealthy={persistenceBlocked === null && saveError === null}
           onStateChange={handleCanvasStateChange}
         />
       </div>

@@ -25,6 +25,7 @@ import SettingsMenu from './SettingsMenu'
 import { NODE_TYPE_CONFIG } from '../nodes/nodeConfig'
 import { analyzeTopology } from '../api/topologyApi'
 import { generateNodeId } from '../utils/nodeId'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import type {
   ComponentType,
   SystemTopology,
@@ -47,6 +48,7 @@ interface CanvasProps {
   initialNodes?: Node[];
   initialEdges?: Edge[];
   initialParams?: SystemParams;
+  persistenceHealthy?: boolean;
   onStateChange?: (nodes: Node[], edges: Edge[], params: SystemParams) => void;
 }
 
@@ -72,7 +74,7 @@ const CONNECTION_TYPE_LABELS: Record<string, string> = {
   unspecified: '',
 }
 
-function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initialParams, onStateChange }: CanvasProps) {
+function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initialParams, persistenceHealthy = true, onStateChange }: CanvasProps) {
   const isDarkMode = theme === 'dark' || theme === 'cyberpunk'
   const isWarmMode = theme === 'warm'
   const isDreamMode = theme === 'dream'
@@ -100,6 +102,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
   const presetsRef = useRef<HTMLDivElement>(null)
   const [dismissedWarnings, setDismissedWarnings] = useState<Set<number>>(new Set())
   const [systemParams, setSystemParams] = useState<SystemParams>(() => initialParams ?? {})
+  const isOnline = useOnlineStatus()
 
   const [clipboard, setClipboard] = useState<{ nodes: Node[]; edges: Edge[] } | null>(null)
 
@@ -909,13 +912,16 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
       return
     }
 
+    // Keep the last result while offline; analysis resumes when the connection returns.
+    if (!isOnline) return
+
     // Use a debounce timer to avoid excessive analysis requests during rapid changes
     const timer = setTimeout(() => {
       handleAnalyze()
     }, 800)
 
     return () => clearTimeout(timer)
-  }, [nodes, systemParams, handleAnalyze])
+  }, [nodes, systemParams, handleAnalyze, isOnline])
 
   const handleDemo = useCallback(() => {
     pushHistory()
@@ -1260,6 +1266,16 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
             onClick={splitSelectedNode}
             title="Split merged node back into individual components"
           />
+        )}
+        {!isOnline && (
+          <span
+            role="status"
+            style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+          >
+            {persistenceHealthy
+              ? 'Offline — analysis paused. Results may be outdated. Changes are saved locally.'
+              : 'Offline — analysis paused. Results may be outdated.'}
+          </span>
         )}
         {analysisResult && (
           <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
