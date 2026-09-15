@@ -10,6 +10,24 @@ const PLAYWRIGHT_SW_BLOCK_WARNING = 'Service Worker registration blocked by Play
 
 export const BACKEND_ERROR_SOLUTION = 'Please ensure the backend service is running and try again.'
 
+// The app's keyboard shortcuts read state through a window keydown listener that React re-binds after
+// re-rendering, so a shortcut pressed right after a state change can read stale state.
+export const SHORTCUT_REBIND_MS = 500
+
+export const WORKSPACE_STORAGE_KEY = 'architectmind:workspace'
+
+export interface StoredWorkspace {
+  readonly version: number
+  readonly activeTabId: string
+  readonly tabs: readonly {
+    readonly id: string
+    readonly name: string
+    readonly nodes: readonly { readonly id: string }[]
+    readonly edges: readonly { readonly id: string }[]
+    readonly params: Readonly<Record<string, unknown>>
+  }[]
+}
+
 export type PresetName = 'Basic' | 'Twitter' | 'YouTube' | 'Google'
 
 export const PRESET_COUNTS: Readonly<Record<PresetName, { readonly nodes: number; readonly edges: number }>> = {
@@ -192,4 +210,27 @@ export async function isHandFontLoaded(page: Page): Promise<boolean> {
       (face) => face.family.replace(/["']/g, '') === 'Caveat Variable' && face.status === 'loaded',
     )
   })
+}
+
+export async function readStoredWorkspace(page: Page): Promise<StoredWorkspace | null> {
+  const raw = await page.evaluate((key) => window.localStorage.getItem(key), WORKSPACE_STORAGE_KEY)
+  return raw === null ? null : (JSON.parse(raw) as StoredWorkspace)
+}
+
+export async function storedNodeCounts(page: Page): Promise<readonly number[]> {
+  const workspace = await readStoredWorkspace(page)
+  return workspace ? workspace.tabs.map((tab) => tab.nodes.length) : []
+}
+
+export async function setDau(page: Page, value: string): Promise<void> {
+  await page.getByRole('button', { name: 'Params' }).click()
+  await page.getByPlaceholder('e.g., 1000000').fill(value)
+  await page.getByRole('button', { name: '✕' }).click()
+}
+
+export async function readDau(page: Page): Promise<string> {
+  await page.getByRole('button', { name: 'Params' }).click()
+  const value = await page.getByPlaceholder('e.g., 1000000').inputValue()
+  await page.getByRole('button', { name: '✕' }).click()
+  return value
 }

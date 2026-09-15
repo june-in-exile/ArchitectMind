@@ -46,7 +46,8 @@ interface CanvasProps {
   setTheme: (theme: 'light' | 'dark' | 'warm' | 'dream' | 'cyberpunk') => void;
   initialNodes?: Node[];
   initialEdges?: Edge[];
-  onStateChange?: (nodes: Node[], edges: Edge[]) => void;
+  initialParams?: SystemParams;
+  onStateChange?: (nodes: Node[], edges: Edge[], params: SystemParams) => void;
 }
 
 const PROTOCOL_LABELS: Record<string, string> = {
@@ -71,7 +72,7 @@ const CONNECTION_TYPE_LABELS: Record<string, string> = {
   unspecified: '',
 }
 
-function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], onStateChange }: CanvasProps) {
+function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initialParams, onStateChange }: CanvasProps) {
   const isDarkMode = theme === 'dark' || theme === 'cyberpunk'
   const isWarmMode = theme === 'warm'
   const isDreamMode = theme === 'dream'
@@ -98,7 +99,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], onState
   const [showPresets, setShowPresets] = useState(false)
   const presetsRef = useRef<HTMLDivElement>(null)
   const [dismissedWarnings, setDismissedWarnings] = useState<Set<number>>(new Set())
-  const [systemParams, setSystemParams] = useState<SystemParams>({})
+  const [systemParams, setSystemParams] = useState<SystemParams>(() => initialParams ?? {})
 
   const [clipboard, setClipboard] = useState<{ nodes: Node[]; edges: Edge[] } | null>(null)
 
@@ -216,11 +217,12 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], onState
     
     prevNodesRef.current = [...nodes]
     prevEdgesRef.current = [...edges]
+  }, [nodes, edges])
 
-    if (onStateChange) {
-      onStateChange(nodes, edges)
-    }
-  }, [nodes, edges, onStateChange])
+  // Reported outside the history effect, which returns early during undo/redo.
+  useEffect(() => {
+    onStateChange?.(nodes, edges, systemParams)
+  }, [nodes, edges, systemParams, onStateChange])
 
   const pushHistory = useCallback(() => {
     if (isUndoRedoRef.current) return

@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { Edge, Node } from '@xyflow/react'
 import Sidebar from './components/Sidebar'
 import Canvas from './components/Canvas'
 import TabBar from './components/TabBar'
 import { useCanvasTabs } from './hooks/useCanvasTabs'
+import type { SystemParams } from './types/topology'
 
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
@@ -43,10 +45,10 @@ function App() {
   } = useCanvasTabs()
 
   const handleCanvasStateChange = useCallback(
-    (nodes: import('@xyflow/react').Node[], edges: import('@xyflow/react').Edge[]) => {
-      updateCanvasStateRef(activeTabId, nodes, edges, activeTab.params)
+    (nodes: Node[], edges: Edge[], params: SystemParams) => {
+      updateCanvasStateRef(activeTabId, nodes, edges, params)
     },
-    [updateCanvasStateRef, activeTabId, activeTab.params]
+    [updateCanvasStateRef, activeTabId]
   )
 
   return (
@@ -79,6 +81,7 @@ function App() {
           setTheme={setTheme}
           initialNodes={[...activeTab.nodes]}
           initialEdges={[...activeTab.edges]}
+          initialParams={activeTab.params}
           onStateChange={handleCanvasStateChange}
         />
       </div>
