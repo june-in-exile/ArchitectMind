@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar'
 import Canvas from './components/Canvas'
 import TabBar from './components/TabBar'
 import PersistenceNotice from './components/PersistenceNotice'
+import PwaUpdatePrompt from './components/PwaUpdatePrompt'
 import { useCanvasTabs } from './hooks/useCanvasTabs'
 import { getBrowserStorage } from './persistence/workspaceStorage'
 import { syncThemeColor } from './theme/themeColor'
@@ -50,6 +51,7 @@ function App() {
     closeTab,
     renameTab,
     updateCanvasStateRef,
+    flush,
     saveError,
     persistenceBlocked,
     restoreFailed,
@@ -97,11 +99,16 @@ function App() {
           onStateChange={handleCanvasStateChange}
         />
       </div>
-      <PersistenceNotice
-        persistenceBlocked={persistenceBlocked}
-        saveError={saveError}
-        restoreFailed={restoreFailed}
-        onReload={reloadPage}
+      <PwaUpdatePrompt
+        onBeforeUpdate={flush}
+        fallback={
+          <PersistenceNotice
+            persistenceBlocked={persistenceBlocked}
+            saveError={saveError}
+            restoreFailed={restoreFailed}
+            onReload={reloadPage}
+          />
+        }
       />
     </div>
   )
