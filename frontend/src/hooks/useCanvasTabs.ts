@@ -1,61 +1,66 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
-import type { Node, Edge } from '@xyflow/react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { Edge, Node } from '@xyflow/react'
 import type { SystemParams } from '../types/topology'
+import { createEmptyTab, createInitialWorkspace, type CanvasTab } from '../persistence/initialWorkspace'
+import { toPersistedWorkspace, type CanvasSnapshot } from '../persistence/workspaceSerializer'
+import { getBrowserStorage } from '../persistence/workspaceStorage'
+import { useWorkspacePersistence } from './useWorkspacePersistence'
 
-export interface CanvasTab {
-  readonly id: string
-  readonly name: string
-  readonly nodes: readonly Node[]
-  readonly edges: readonly Edge[]
-  readonly params: SystemParams
-}
+export type { CanvasTab } from '../persistence/initialWorkspace'
 
-let tabCounter = 0
-function generateTabId(): string {
-  tabCounter += 1
-  return `tab-${Date.now()}-${tabCounter}`
-}
-
-function createEmptyTab(name: string): CanvasTab {
-  return {
-    id: generateTabId(),
-    name: name,
-    nodes: [],
-    edges: [],
-    params: {},
-  }
+function nextActiveTabId(tabs: readonly CanvasTab[], closedTabId: string, activeTabId: string): string {
+  if (closedTabId !== activeTabId) return activeTabId
+  const closedIndex = tabs.findIndex((tab) => tab.id === closedTabId)
+  const remaining = tabs.filter((tab) => tab.id !== closedTabId)
+  return remaining[Math.min(closedIndex, remaining.length - 1)].id
 }
 
 export function useCanvasTabs() {
-  const [tabs, setTabs] = useState<CanvasTab[]>(() => {
-    return [createEmptyTab('Untitled 1')]
-  })
-  const [activeTabId, setActiveTabId] = useState<string>(() => tabs[0].id)
-  const canvasStateRef = useRef<{ nodes: Node[]; edges: Edge[]; params: SystemParams } | null>(null)
-  const activeTabRef = useRef<CanvasTab>(tabs[0])
+  const [initial] = useState(() => createInitialWorkspace(getBrowserStorage()))
+  const [tabs, setTabs] = useState<readonly CanvasTab[]>(initial.tabs)
+  const [activeTabId, setActiveTabId] = useState(initial.activeTabId)
+  const snapshotRef = useRef<CanvasSnapshot | null>(null)
+  const tabsRef = useRef(tabs)
+  const activeTabIdRef = useRef(activeTabId)
 
-  const activeTab = tabs.find((t) => t.id === activeTabId) ?? tabs[0]
+  const activeTab = tabs.find((tab) => tab.id === activeTabId) ?? tabs[0]
 
   useEffect(() => {
-    activeTabRef.current = activeTab
-  }, [activeTab])
+    tabsRef.current = tabs
+    activeTabIdRef.current = activeTabId
+  }, [tabs, activeTabId])
+
+  const getWorkspace = useCallback(
+    () => toPersistedWorkspace(tabsRef.current, activeTabIdRef.current, snapshotRef.current),
+    [],
+  )
+
+  const { scheduleSave, flush, saveError } = useWorkspacePersistence({
+    storage: initial.storage,
+    blocked: initial.blocked,
+    initialJson: initial.initialJson,
+    getWorkspace,
+  })
+
+  useEffect(() => {
+    scheduleSave()
+  }, [tabs, activeTabId, scheduleSave])
 
   const saveCurrentCanvasState = useCallback(() => {
-    const state = canvasStateRef.current
-    if (!state) return
+    const snapshot = snapshotRef.current
+    if (!snapshot || snapshot.tabId !== activeTabId) return
     setTabs((prev) =>
       prev.map((tab) =>
-        tab.id === activeTabId
-          ? { ...tab, nodes: [...state.nodes], edges: [...state.edges], params: { ...state.params } }
-          : tab
-      )
+        tab.id === snapshot.tabId
+          ? { ...tab, nodes: [...snapshot.nodes], edges: [...snapshot.edges], params: { ...snapshot.params } }
+          : tab,
+      ),
     )
   }, [activeTabId])
 
   const addTab = useCallback(() => {
     saveCurrentCanvasState()
-    const nextName = `Untitled ${tabs.length + 1}`
-    const newTab = createEmptyTab(nextName)
+    const newTab = createEmptyTab(`Untitled ${tabs.length + 1}`)
     setTabs((prev) => [...prev, newTab])
     setActiveTabId(newTab.id)
   }, [saveCurrentCanvasState, tabs.length])
@@ -66,46 +71,29 @@ export function useCanvasTabs() {
       saveCurrentCanvasState()
       setActiveTabId(tabId)
     },
-    [activeTabId, saveCurrentCanvasState]
+    [activeTabId, saveCurrentCanvasState],
   )
 
   const closeTab = useCallback(
     (tabId: string) => {
-      setTabs((prev) => {
-        if (prev.length <= 1) return prev
-        const filtered = prev.filter((t) => t.id !== tabId)
-        if (tabId === activeTabId) {
-          const closedIndex = prev.findIndex((t) => t.id === tabId)
-          const newActive = filtered[Math.min(closedIndex, filtered.length - 1)]
-          setActiveTabId(newActive.id)
-        }
-        return filtered
-      })
+      if (tabs.length <= 1) return
+      setActiveTabId(nextActiveTabId(tabs, tabId, activeTabId))
+      setTabs(tabs.filter((tab) => tab.id !== tabId))
     },
-    [activeTabId]
+    [tabs, activeTabId],
   )
 
   const renameTab = useCallback((tabId: string, newName: string) => {
-    setTabs((prev) =>
-      prev.map((tab) =>
-        tab.id === tabId ? { ...tab, name: newName } : tab
-      )
-    )
+    setTabs((prev) => prev.map((tab) => (tab.id === tabId ? { ...tab, name: newName } : tab)))
   }, [])
 
   const updateCanvasStateRef = useCallback(
-    (nodes: Node[], edges: Edge[], params?: SystemParams) => {
-      canvasStateRef.current = { nodes, edges, params: params ?? {} }
+    (tabId: string, nodes: Node[], edges: Edge[], params: SystemParams) => {
+      snapshotRef.current = { tabId, nodes, edges, params }
+      scheduleSave()
     },
-    []
+    [scheduleSave],
   )
-
-  const getCurrentState = useCallback(() => {
-    const current = canvasStateRef.current
-    if (current) return current
-    const tab = activeTabRef.current
-    return { nodes: [...tab.nodes], edges: [...tab.edges], params: { ...tab.params } }
-  }, [])
 
   return {
     tabs,
@@ -116,6 +104,9 @@ export function useCanvasTabs() {
     closeTab,
     renameTab,
     updateCanvasStateRef,
-    getCurrentState,
+    flush,
+    saveError,
+    persistenceBlocked: initial.blocked,
+    restoreFailed: initial.restoreFailed,
   }
 }

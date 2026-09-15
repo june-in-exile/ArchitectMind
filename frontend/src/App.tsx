@@ -44,9 +44,9 @@ function App() {
 
   const handleCanvasStateChange = useCallback(
     (nodes: import('@xyflow/react').Node[], edges: import('@xyflow/react').Edge[]) => {
-      updateCanvasStateRef(nodes, edges)
+      updateCanvasStateRef(activeTabId, nodes, edges, activeTab.params)
     },
-    [updateCanvasStateRef]
+    [updateCanvasStateRef, activeTabId, activeTab.params]
   )
 
   return (
