@@ -9,7 +9,6 @@ interface WarningsPanelProps {
   dismissedWarnings: Set<number>
   setDismissedWarnings: Dispatch<SetStateAction<Set<number>>>
   setShowWarnings: Dispatch<SetStateAction<boolean>>
-  showPropertyPanel: boolean
   fitViewToNode: (nodeId: string) => void
   tooltipBg: string
   tooltipHover: string

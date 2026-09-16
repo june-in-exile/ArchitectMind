@@ -1417,7 +1417,6 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
               dismissedWarnings={dismissedWarnings}
               setDismissedWarnings={setDismissedWarnings}
               setShowWarnings={setShowWarnings}
-              showPropertyPanel={showPropertyPanel}
               fitViewToNode={fitViewToNode}
               tooltipBg={tooltipBg}
               tooltipHover={tooltipHover}
