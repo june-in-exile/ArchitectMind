@@ -803,12 +803,11 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
 
   const placeNodeAt = useCallback(
     (clientX: number, clientY: number, componentType: ComponentType) => {
-      if (!rfInstance || !reactFlowWrapper.current) return
+      if (!rfInstance) return
 
-      const bounds = reactFlowWrapper.current.getBoundingClientRect()
       const position = rfInstance.screenToFlowPosition({
-        x: clientX - bounds.left,
-        y: clientY - bounds.top,
+        x: clientX,
+        y: clientY,
       })
 
       pushHistory()
