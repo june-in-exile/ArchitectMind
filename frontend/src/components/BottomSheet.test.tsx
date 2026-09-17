@@ -1,6 +1,4 @@
-import { render, screen } from '@testing-library/react'
-import '@testing-library/jest-dom/vitest'
-import userEvent from '@testing-library/user-event'
+import { fireEvent, render, screen } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 import BottomSheet from './BottomSheet'
 
@@ -17,28 +15,28 @@ describe('BottomSheet', () => {
   it('renders nothing when closed', () => {
     renderSheet(false)
 
-    expect(screen.queryByText('sheet body')).not.toBeInTheDocument()
+    expect(screen.queryByText('sheet body')).toBeNull()
   })
 
   it('shows its label and children when open', () => {
     renderSheet(true)
 
-    expect(screen.getByRole('dialog', { name: 'Components' })).toBeInTheDocument()
-    expect(screen.getByText('sheet body')).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Components' })).toBeTruthy()
+    expect(screen.getByText('sheet body')).toBeTruthy()
   })
 
-  it('closes when the close button is pressed', async () => {
+  it('closes when the close button is pressed', () => {
     const onClose = renderSheet(true)
 
-    await userEvent.click(screen.getByRole('button', { name: 'Close' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }))
 
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 
-  it('closes when the backdrop is pressed', async () => {
+  it('closes when the backdrop is pressed', () => {
     const onClose = renderSheet(true)
 
-    await userEvent.click(screen.getByTestId('bottom-sheet-backdrop'))
+    fireEvent.click(screen.getByTestId('bottom-sheet-backdrop'))
 
     expect(onClose).toHaveBeenCalledTimes(1)
   })
