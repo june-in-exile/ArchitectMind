@@ -22,6 +22,7 @@ export default defineConfig({
         'src/hooks/useCanvasTabs.ts',
         'src/hooks/useWorkspacePersistence.ts',
         'src/hooks/useOnlineStatus.ts',
+        'src/hooks/useIsMobile.ts',
         'src/components/PwaUpdatePrompt.tsx',
         'src/components/Toast.tsx',
         'src/components/PersistenceNotice.tsx',
