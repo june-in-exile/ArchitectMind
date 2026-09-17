@@ -1,5 +1,6 @@
 import type { ComponentProps, Dispatch, RefObject, SetStateAction } from 'react'
 import ComponentPropertyPanel from './ComponentPropertyPanel'
+import BottomSheet from './BottomSheet'
 import EdgePropertyPanel from './EdgePropertyPanel'
 
 type ComponentPanelProps = ComponentProps<typeof ComponentPropertyPanel>
@@ -18,6 +19,8 @@ interface PropertyDockProps {
   onEdgeAnimatedChange: EdgePanelProps['onEdgeAnimatedChange']
   onEdgeDirectionChange: EdgePanelProps['onEdgeDirectionChange']
   onEdgeReverse: EdgePanelProps['onEdgeReverse']
+  isMobile: boolean
+  onDeleteSelected: () => void
 }
 
 function PropertyDock({
@@ -33,7 +36,53 @@ function PropertyDock({
   onEdgeAnimatedChange,
   onEdgeDirectionChange,
   onEdgeReverse,
+  isMobile,
+  onDeleteSelected,
 }: PropertyDockProps) {
+  if (isMobile) {
+    return (
+      <BottomSheet
+        open={Boolean(selectedNode || selectedEdgeId)}
+        label="Properties"
+        onClose={() => setShowPropertyPanel(false)}
+      >
+        <ComponentPropertyPanel
+          selectedNode={selectedNode}
+          selectedEdgeId={selectedEdgeId}
+          onNodeDataChange={onNodeDataChange}
+        />
+        <EdgePropertyPanel
+          selectedEdgeId={selectedEdgeId}
+          edges={edges}
+          onEdgeDataChange={onEdgeDataChange}
+          onEdgeAnimatedChange={onEdgeAnimatedChange}
+          onEdgeDirectionChange={onEdgeDirectionChange}
+          onEdgeReverse={onEdgeReverse}
+        />
+        {selectedNode && (
+          <button
+            type="button"
+            aria-label="Delete component"
+            onClick={onDeleteSelected}
+            style={{
+              marginTop: 12,
+              width: '100%',
+              minHeight: 44,
+              border: '1px solid #dc2626',
+              borderRadius: 8,
+              background: 'transparent',
+              color: '#dc2626',
+              fontSize: 14,
+              cursor: 'pointer',
+            }}
+          >
+            Delete
+          </button>
+        )}
+      </BottomSheet>
+    )
+  }
+
   return (
     <div style={{ position: 'relative' }}>
       <div

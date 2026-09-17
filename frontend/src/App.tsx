@@ -6,6 +6,7 @@ import TabBar from './components/TabBar'
 import PersistenceNotice from './components/PersistenceNotice'
 import PwaUpdatePrompt from './components/PwaUpdatePrompt'
 import { useCanvasTabs } from './hooks/useCanvasTabs'
+import { useIsMobile } from './hooks/useIsMobile'
 import { selectNotice } from './notices/selectNotice'
 import { useDismissibleNotice } from './notices/useDismissibleNotice'
 import { getBrowserStorage } from './persistence/workspaceStorage'
@@ -20,6 +21,7 @@ function reloadPage(): void {
 function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [storage] = useState(() => getBrowserStorage())
+  const isMobile = useIsMobile()
   const [theme, setTheme] = useState<Theme>(() =>
     readThemePreference(storage, window.matchMedia('(prefers-color-scheme: dark)').matches)
   )
@@ -80,7 +82,7 @@ function App() {
         color: 'var(--text-primary)',
       }}
     >
-      {isSidebarOpen && (
+      {!isMobile && isSidebarOpen && (
         <Sidebar />
       )}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
@@ -93,6 +95,7 @@ function App() {
           onRenameTab={renameTab}
           isSidebarOpen={isSidebarOpen}
           onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+          isMobile={isMobile}
         />
         <Canvas
           key={activeTabId}

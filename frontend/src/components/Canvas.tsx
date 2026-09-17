@@ -761,6 +761,13 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
     [setEdges, selectedNodeId]
   )
 
+  // Routes through React Flow so onNodesDelete still prunes the connected edges
+  // and clears the selection, and the history effect records the removal.
+  const deleteSelectedNode = useCallback(() => {
+    if (!rfInstance || !selectedNodeId) return
+    void rfInstance.deleteElements({ nodes: [{ id: selectedNodeId }] })
+  }, [rfInstance, selectedNodeId])
+
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault()
     event.dataTransfer.dropEffect = 'move'
@@ -1467,6 +1474,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
               fitViewToNode={fitViewToNode}
               tooltipBg={tooltipBg}
               tooltipHover={tooltipHover}
+              isMobile={isMobile}
             />
           )}
         </div>
@@ -1484,6 +1492,8 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
             onEdgeAnimatedChange={onEdgeAnimatedChange}
             onEdgeDirectionChange={onEdgeDirectionChange}
             onEdgeReverse={onEdgeReverse}
+            isMobile={isMobile}
+            onDeleteSelected={deleteSelectedNode}
           />
         )}
       </div>

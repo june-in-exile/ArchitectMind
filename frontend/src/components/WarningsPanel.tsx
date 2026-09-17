@@ -1,5 +1,6 @@
 import type { Dispatch, MouseEvent, SetStateAction } from 'react'
 import type { AnalyzeResponse, Warning } from '../types/topology'
+import BottomSheet from './BottomSheet'
 
 interface WarningsPanelProps {
   panelHeight: number
@@ -12,6 +13,7 @@ interface WarningsPanelProps {
   fitViewToNode: (nodeId: string) => void
   tooltipBg: string
   tooltipHover: string
+  isMobile: boolean
 }
 
 function WarningsPanel({
@@ -25,7 +27,28 @@ function WarningsPanel({
   fitViewToNode,
   tooltipBg,
   tooltipHover,
+  isMobile,
 }: WarningsPanelProps) {
+  if (isMobile) {
+    return (
+      <BottomSheet open label="Warnings" onClose={() => setShowWarnings(false)}>
+        {activeWarnings.map((warning, index) => (
+          <div
+            key={`${warning.rule}-${index}`}
+            style={{
+              padding: '10px 0',
+              borderBottom: '1px solid var(--border-color)',
+              fontSize: 13,
+              color: 'var(--text-primary)',
+            }}
+          >
+            {warning.message}
+          </div>
+        ))}
+      </BottomSheet>
+    )
+  }
+
   return (
     <div
       style={{
