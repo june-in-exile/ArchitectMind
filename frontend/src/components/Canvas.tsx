@@ -25,6 +25,8 @@ import { NODE_TYPE_CONFIG } from '../nodes/nodeConfig'
 import { analyzeTopology } from '../api/topologyApi'
 import { generateNodeId } from '../utils/nodeId'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { useIsMobile } from '../hooks/useIsMobile'
+import ComponentDrawer from './ComponentDrawer'
 import type {
   ComponentType,
   SystemTopology,
@@ -102,6 +104,9 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
   const [dismissedWarnings, setDismissedWarnings] = useState<Set<number>>(new Set())
   const [systemParams, setSystemParams] = useState<SystemParams>(() => initialParams ?? {})
   const isOnline = useOnlineStatus()
+  const isMobile = useIsMobile()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [pendingType, setPendingType] = useState<ComponentType | null>(null)
 
   const [clipboard, setClipboard] = useState<{ nodes: Node[]; edges: Edge[] } | null>(null)
 
@@ -796,6 +801,45 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
     [rfInstance, setNodes, pushHistory]
   )
 
+  const placeNodeAt = useCallback(
+    (clientX: number, clientY: number, componentType: ComponentType) => {
+      if (!rfInstance || !reactFlowWrapper.current) return
+
+      const bounds = reactFlowWrapper.current.getBoundingClientRect()
+      const position = rfInstance.screenToFlowPosition({
+        x: clientX - bounds.left,
+        y: clientY - bounds.top,
+      })
+
+      pushHistory()
+      const config = NODE_TYPE_CONFIG[componentType]
+      const newNode: Node = {
+        id: generateNodeId(),
+        type: 'architecture',
+        position,
+        data: {
+          label: config.label,
+          componentType,
+          properties: { ...config.defaultProperties },
+        },
+      }
+
+      setNodes((nds) => [...nds, newNode])
+    },
+    [rfInstance, setNodes, pushHistory]
+  )
+
+  // Desktop keeps pendingType null, so this handler is inert there.
+  const onPaneClick = useCallback(
+    (event: React.MouseEvent) => {
+      if (!pendingType) return
+      placeNodeAt(event.clientX, event.clientY, pendingType)
+      setPendingType(null)
+      setDrawerOpen(false)
+    },
+    [pendingType, placeNodeAt]
+  )
+
   const isAnalyzingRef = useRef(false)
 
   const handleAnalyze = useCallback(async () => {
@@ -1251,6 +1295,8 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
         canSplit={Boolean(canSplit)}
         mergeSelectedNodes={mergeSelectedNodes}
         splitSelectedNode={splitSelectedNode}
+        isMobile={isMobile}
+        onOpenComponents={() => setDrawerOpen(true)}
         isOnline={isOnline}
         persistenceHealthy={persistenceHealthy}
         analysisResult={analysisResult}
@@ -1322,8 +1368,10 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
               }
             })}
             selectionMode={SelectionMode.Partial}
-            selectionOnDrag
-            panOnDrag={false}
+            selectionOnDrag={!isMobile}
+            panOnDrag={isMobile}
+            onPaneClick={onPaneClick}
+            className={isMobile ? 'mobile' : undefined}
             panOnScroll
             selectionKeyCode={null}
             multiSelectionKeyCode="Shift"
@@ -1440,6 +1488,17 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
           />
         )}
       </div>
+      {isMobile && (
+        <ComponentDrawer
+          open={drawerOpen}
+          onClose={() => {
+            setDrawerOpen(false)
+            setPendingType(null)
+          }}
+          selectedType={pendingType}
+          onSelect={(type) => setPendingType((current) => (current === type ? null : type))}
+        />
+      )}
     </div>
   )
 }

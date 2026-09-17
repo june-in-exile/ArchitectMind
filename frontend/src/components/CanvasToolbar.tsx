@@ -14,6 +14,8 @@ interface CanvasToolbarProps {
   canSplit: boolean
   mergeSelectedNodes: () => void
   splitSelectedNode: () => void
+  isMobile: boolean
+  onOpenComponents: () => void
   isOnline: boolean
   persistenceHealthy: boolean
   analysisResult: AnalyzeResponse | null
@@ -37,6 +39,8 @@ function CanvasToolbar({
   canSplit,
   mergeSelectedNodes,
   splitSelectedNode,
+  isMobile,
+  onOpenComponents,
   isOnline,
   persistenceHealthy,
   analysisResult,
@@ -61,14 +65,34 @@ function CanvasToolbar({
         backgroundColor: 'var(--bg-primary)'
       }}
     >
-      {canMerge && (
+      {isMobile && (
+        <button
+          type="button"
+          aria-label="Add component"
+          onClick={onOpenComponents}
+          style={{
+            width: 44,
+            height: 44,
+            border: '1px solid var(--border-color)',
+            borderRadius: 8,
+            background: 'var(--bg-secondary)',
+            color: 'var(--text-primary)',
+            fontSize: 20,
+            lineHeight: 1,
+            cursor: 'pointer',
+          }}
+        >
+          +
+        </button>
+      )}
+      {!isMobile && canMerge && (
         <ToolbarButton
           label="Merge"
           shortcut="Ctrl+M"
           onClick={mergeSelectedNodes}
         />
       )}
-      {canSplit && (
+      {!isMobile && canSplit && (
         <ToolbarButton
           label="Split"
           onClick={splitSelectedNode}
