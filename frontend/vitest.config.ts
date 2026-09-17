@@ -24,6 +24,7 @@ export default defineConfig({
         'src/hooks/useOnlineStatus.ts',
         'src/hooks/useIsMobile.ts',
         'src/components/PwaUpdatePrompt.tsx',
+        'src/components/BottomSheet.tsx',
         'src/components/Toast.tsx',
         'src/components/PersistenceNotice.tsx',
         'src/notices/selectNotice.ts',
