@@ -15,6 +15,7 @@ ArchitectMind is a web-based tool for visualizing and analyzing system architect
 - **Multi-tab Support**: Open multiple design canvases simultaneously for architecture comparison and multi-project workflows.
 - **Auto-save**: Every tab, its canvas, and its system parameters are saved in your browser and restored when you come back.
 - **Installable & Offline-ready (PWA)**: Install ArchitectMind as an app; it opens offline, and analysis resumes when the connection returns.
+- **Mobile-friendly**: On a phone the panels become bottom sheets, you add components by tapping the canvas, and one finger pans while two fingers zoom.
 - **One-click Presets**: Classic system design templates (Basic, Twitter, YouTube, Google) to help you get started quickly.
 - **Export Capabilities**: Supports exporting to Excalidraw, PNG, Mermaid, and PDF formats.
 - **Quick Operations**: **Duplicate** (Shift + drag), **Merge/Split** of role-based nodes, **Undo/Redo**, **Copy/Paste**, and **Select All**.

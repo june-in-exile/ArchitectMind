@@ -24,6 +24,7 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - `cd frontend && npm run test:coverage` - Unit tests with the 80% coverage threshold
 - `cd frontend && npm run test:e2e` - Playwright regression suite on the production build (Chromium with and without a service worker, and WebKit; API mocked)
 - `cd frontend && E2E_REAL_BACKEND=1 npx playwright test --project=real-backend` - Smoke test against the Go backend (port 8080 must be free)
+- `cd frontend && npx playwright test --project=mobile-chromium` - Mobile layout suite (Pixel 5, touch)
 
 ## Architecture
 
@@ -32,6 +33,7 @@ ArchitectMind is a system design visualizer with a React Flow canvas and a Go Gi
 - **Validation Rules**: Implemented in `logic/check_*.go`. 45 rules covering Availability, Performance, Security, Observability, and Capacity Planning. The canonical list lives in `logic.AllRuleNames` (`logic/warning.go`) and is documented in `docs/RULES.md`.
 - **Frontend State**: Managed in `Canvas.tsx` (nodes, edges, system params) with undo/redo history. Multi-tab support via `useCanvasTabs`, which restores every tab from localStorage (`architectmind:workspace`) and saves changes through `src/persistence/` and `useWorkspacePersistence` (500 ms debounce, writes only when the workspace changed). Sidebar visibility and theme live in `App.tsx`.
 - **PWA**: `vite-plugin-pwa` (prompt mode) precaches the build and the self-hosted Caveat font; `PwaUpdatePrompt` asks before activating a new version, and auto analysis pauses while offline.
+- **Mobile**: Below 768px — and on short landscape phones — `useIsMobile` switches the layout: the component palette and the property panel become bottom sheets, components are added by tapping the canvas instead of dragging, and one-finger drag pans the canvas. Merge, split, copy/paste and undo/redo stay desktop-only.
 - **Export**: Utilities in `src/utils/` for Excalidraw, Image, Mermaid, and PDF, wired up in `SettingsMenu.tsx`.
 - **Presets**: Basic, Twitter, YouTube, and Google architectures under the Demo dropdown in the canvas toolbar.
 - **Editing**: Duplicate (Shift+drag), Merge/Split of role-based nodes, copy/paste, select all, undo/redo — all keyboard-driven in `Canvas.tsx`.
