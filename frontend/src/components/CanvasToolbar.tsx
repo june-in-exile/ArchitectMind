@@ -62,7 +62,8 @@ function CanvasToolbar({
         display: 'flex',
         alignItems: 'center',
         gap: 12,
-        backgroundColor: 'var(--bg-primary)'
+        backgroundColor: 'var(--bg-primary)',
+        overflowX: isMobile ? 'auto' : undefined,
       }}
     >
       {isMobile && (
@@ -77,9 +78,10 @@ function CanvasToolbar({
             borderRadius: 8,
             background: 'var(--bg-secondary)',
             color: 'var(--text-primary)',
-            fontSize: 20,
-            lineHeight: 1,
-            cursor: 'pointer',
+              fontSize: 20,
+              lineHeight: 1,
+              cursor: 'pointer',
+              flexShrink: 0,
           }}
         >
           +
@@ -102,7 +104,7 @@ function CanvasToolbar({
       {!isOnline && (
         <span
           role="status"
-          style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}
+          style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', flexShrink: 0 }}
         >
           {persistenceHealthy
             ? 'Offline — analysis paused. Results may be outdated. Changes are saved locally.'
@@ -110,7 +112,7 @@ function CanvasToolbar({
         </span>
       )}
       {analysisResult && (
-        <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <span style={{ fontSize: 13, color: 'var(--text-secondary)', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif' }}>
             {analysisResult.success
               ? `${analysisResult.nodeCount} nodes, ${analysisResult.edgeCount} edges`
@@ -132,7 +134,7 @@ function CanvasToolbar({
           </span>
         </div>
       )}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
         <div ref={presetsRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setShowPresets(prev => !prev)}
