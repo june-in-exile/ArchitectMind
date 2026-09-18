@@ -32,6 +32,17 @@ describe('ComponentDrawer', () => {
   it('marks the pending type as pressed', () => {
     render(<ComponentDrawer open onClose={vi.fn()} selectedType="database" onSelect={vi.fn()} />)
 
-    expect(screen.getByRole('button', { name: NODE_TYPE_CONFIG.database.label }).getAttribute('aria-pressed')).toBe('true')
+    const selectedButton = screen.getByRole('button', { name: NODE_TYPE_CONFIG.database.label })
+
+    expect(selectedButton.getAttribute('aria-pressed')).toBe('true')
+    expect(selectedButton.style.borderColor).toBe('var(--accent)')
+    expect(selectedButton.style.boxShadow).not.toBe('')
+    expect(selectedButton.querySelector('[aria-hidden="true"]')?.textContent).toBe('✓')
+  })
+
+  it('uses the hand-drawn typeface for component names', () => {
+    render(<ComponentDrawer open onClose={vi.fn()} selectedType={null} onSelect={vi.fn()} />)
+
+    expect(screen.getByRole('button', { name: NODE_TYPE_CONFIG.client.label }).style.fontFamily).toBe('var(--font-hand)')
   })
 })

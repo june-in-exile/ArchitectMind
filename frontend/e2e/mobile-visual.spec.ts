@@ -21,9 +21,10 @@ test('Basic preset', async ({ page }) => {
   await expect(page).toHaveScreenshot('mobile-basic-preset.png')
 })
 
-test('component drawer', async ({ page }) => {
+test('component drawer with a pending selection', async ({ page }) => {
   await page.getByRole('button', { name: 'Add component' }).tap()
   await expect(page.getByRole('dialog', { name: 'Components' })).toBeVisible()
+  await page.getByRole('button', { name: 'Database' }).tap()
   await settleForScreenshot(page)
 
   await expect(page).toHaveScreenshot('mobile-component-drawer.png')

@@ -31,18 +31,35 @@ function ComponentDrawer({ open, onClose, selectedType, onSelect }: ComponentDra
               aria-pressed={isSelected}
               onClick={() => onSelect(type)}
               style={{
+                position: 'relative',
                 minHeight: 56,
                 padding: '8px 4px',
                 borderRadius: 8,
-                border: `1.5px solid ${config.color}`,
-                backgroundColor: isSelected ? `${config.color}35` : `${config.color}12`,
+                borderWidth: isSelected ? 2 : 1.5,
+                borderStyle: 'solid',
+                borderColor: isSelected ? 'var(--accent)' : config.color,
+                backgroundColor: isSelected
+                  ? 'color-mix(in srgb, var(--accent) 28%, var(--bg-primary))'
+                  : `${config.color}12`,
                 color: 'var(--text-primary)',
-                fontSize: 12,
-                fontWeight: isSelected ? 600 : 400,
+                fontFamily: 'var(--font-hand)',
+                fontSize: 16,
+                fontWeight: 600,
+                boxShadow: isSelected
+                  ? 'inset 0 0 0 1px var(--accent), 0 0 12px color-mix(in srgb, var(--accent) 45%, transparent)'
+                  : 'none',
                 cursor: 'pointer',
               }}
             >
               {config.label}
+              {isSelected && (
+                <span
+                  aria-hidden="true"
+                  style={{ position: 'absolute', top: 4, right: 7, color: 'var(--accent)', fontSize: 14 }}
+                >
+                  ✓
+                </span>
+              )}
             </button>
           )
         })}
