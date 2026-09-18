@@ -45,6 +45,7 @@ function PropertyDock({
         open={Boolean(selectedNode || selectedEdgeId)}
         label="Properties"
         onClose={() => setShowPropertyPanel(false)}
+        backdropPassthrough
       >
         <ComponentPropertyPanel
           selectedNode={selectedNode}

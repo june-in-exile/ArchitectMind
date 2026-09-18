@@ -5,6 +5,7 @@ interface BottomSheetProps {
   label: string
   onClose: () => void
   maxHeightVh?: number
+  backdropPassthrough?: boolean
   children: ReactNode
 }
 
@@ -12,10 +13,15 @@ type BottomSheetControls = Pick<BottomSheetProps, 'label' | 'onClose'>
 
 interface BottomSheetPanelProps extends BottomSheetControls {
   maxHeightVh: number
+  modal: boolean
   children: ReactNode
 }
 
-function BottomSheetBackdrop({ onClose }: Pick<BottomSheetProps, 'onClose'>) {
+interface BottomSheetBackdropProps extends Pick<BottomSheetProps, 'onClose'> {
+  passthrough: boolean
+}
+
+function BottomSheetBackdrop({ onClose, passthrough }: BottomSheetBackdropProps) {
   return (
     <div
       data-testid="bottom-sheet-backdrop"
@@ -24,6 +30,7 @@ function BottomSheetBackdrop({ onClose }: Pick<BottomSheetProps, 'onClose'>) {
         position: 'fixed',
         inset: 0,
         backgroundColor: 'rgba(0, 0, 0, 0.35)',
+        pointerEvents: passthrough ? 'none' : 'auto',
         zIndex: 30,
       }}
     />
@@ -62,11 +69,11 @@ function BottomSheetHeader({ label, onClose }: BottomSheetControls) {
   )
 }
 
-function BottomSheetPanel({ label, onClose, maxHeightVh, children }: BottomSheetPanelProps) {
+function BottomSheetPanel({ label, onClose, maxHeightVh, modal, children }: BottomSheetPanelProps) {
   return (
     <div
       role="dialog"
-      aria-modal="true"
+      aria-modal={modal || undefined}
       aria-label={label}
       style={{
         position: 'fixed',
@@ -91,13 +98,25 @@ function BottomSheetPanel({ label, onClose, maxHeightVh, children }: BottomSheet
   )
 }
 
-function BottomSheet({ open, label, onClose, maxHeightVh = 60, children }: BottomSheetProps) {
+function BottomSheet({
+  open,
+  label,
+  onClose,
+  maxHeightVh = 60,
+  backdropPassthrough = false,
+  children,
+}: BottomSheetProps) {
   if (!open) return null
 
   return (
     <>
-      <BottomSheetBackdrop onClose={onClose} />
-      <BottomSheetPanel label={label} onClose={onClose} maxHeightVh={maxHeightVh}>
+      <BottomSheetBackdrop onClose={onClose} passthrough={backdropPassthrough} />
+      <BottomSheetPanel
+        label={label}
+        onClose={onClose}
+        maxHeightVh={maxHeightVh}
+        modal={!backdropPassthrough}
+      >
         {children}
       </BottomSheetPanel>
     </>

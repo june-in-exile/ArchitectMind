@@ -332,10 +332,10 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
 
   // Auto-show warnings panel when analysis returns warnings
   useEffect(() => {
-    if (!analyzing && analysisResult?.warnings && analysisResult.warnings.length > 0) {
+    if (!isMobile && !analyzing && analysisResult?.warnings && analysisResult.warnings.length > 0) {
       setShowWarnings(true)
     }
-  }, [analyzing, analysisResult])
+  }, [isMobile, analyzing, analysisResult])
 
   const selectedNodes = nodes.filter((n) => selectedNodeIds.includes(n.id))
   const selectedNode = nodes.find((n) => n.id === selectedNodeId) || null

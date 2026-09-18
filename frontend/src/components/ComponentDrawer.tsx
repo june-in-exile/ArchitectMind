@@ -13,7 +13,13 @@ interface ComponentDrawerProps {
 
 function ComponentDrawer({ open, onClose, selectedType, onSelect }: ComponentDrawerProps) {
   return (
-    <BottomSheet open={open} label="Components" onClose={onClose} maxHeightVh={50}>
+    <BottomSheet
+      open={open}
+      label="Components"
+      onClose={onClose}
+      maxHeightVh={50}
+      backdropPassthrough
+    >
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
         {COMPONENT_TYPES.map((type) => {
           const config = NODE_TYPE_CONFIG[type]
