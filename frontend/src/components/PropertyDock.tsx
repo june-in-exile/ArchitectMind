@@ -60,10 +60,10 @@ function PropertyDock({
           onEdgeDirectionChange={onEdgeDirectionChange}
           onEdgeReverse={onEdgeReverse}
         />
-        {selectedNode && (
+        {((selectedNode || selectedEdgeId)) && (
           <button
             type="button"
-            aria-label="Delete component"
+            aria-label="Delete element"
             onClick={onDeleteSelected}
             style={{
               marginTop: 12,

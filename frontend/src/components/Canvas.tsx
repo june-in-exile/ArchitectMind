@@ -789,10 +789,37 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
 
   // Routes through React Flow so onNodesDelete still prunes the connected edges
   // and clears the selection, and the history effect records the removal.
-  const deleteSelectedNode = useCallback(() => {
-    if (!rfInstance || !selectedNodeId) return
-    void rfInstance.deleteElements({ nodes: [{ id: selectedNodeId }] })
-  }, [rfInstance, selectedNodeId])
+  const deleteSelectedElement = useCallback(() => {
+    if (!rfInstance) return
+    const elementsToDelete: { nodes: Node[]; edges: Edge[] } = { nodes: [], edges: [] }
+    
+    if (selectedNodeId) {
+      elementsToDelete.nodes.push({ id: selectedNodeId } as Node)
+      // On mobile, deleteElements might not trigger onNodesDelete or automatic edge removal,
+      // so explicitly add connected edges to the deletion list.
+      const connectedEdges = edges.filter(
+        (e) => e.source === selectedNodeId || e.target === selectedNodeId
+      )
+      elementsToDelete.edges.push(...connectedEdges)
+      setSelectedNodeId(null)
+    } else if (selectedEdgeId) {
+      elementsToDelete.edges.push({ id: selectedEdgeId } as Edge)
+      setSelectedEdgeId(null)
+    }
+
+    if (elementsToDelete.nodes.length > 0 || elementsToDelete.edges.length > 0) {
+      void rfInstance.deleteElements(elementsToDelete)
+    }
+  }, [rfInstance, selectedNodeId, selectedEdgeId, edges])
+
+  const clearCanvas = useCallback(() => {
+    if (!rfInstance) return
+    const allNodes = rfInstance.getNodes()
+    const allEdges = rfInstance.getEdges()
+    void rfInstance.deleteElements({ nodes: allNodes, edges: allEdges })
+    setSelectedNodeId(null)
+    setSelectedEdgeId(null)
+  }, [rfInstance])
 
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault()
@@ -1329,6 +1356,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
         splitSelectedNode={splitSelectedNode}
         isMobile={isMobile}
         onOpenComponents={() => setDrawerOpen(true)}
+        onClearCanvas={clearCanvas}
         isOnline={isOnline}
         persistenceHealthy={persistenceHealthy}
         analysisResult={analysisResult}
@@ -1544,7 +1572,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
             onEdgeDirectionChange={onEdgeDirectionChange}
             onEdgeReverse={onEdgeReverse}
             isMobile={isMobile}
-            onDeleteSelected={deleteSelectedNode}
+            onDeleteSelected={deleteSelectedElement}
           />
         )}
       </div>

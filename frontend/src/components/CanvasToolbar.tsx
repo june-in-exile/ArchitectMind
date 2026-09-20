@@ -17,6 +17,7 @@ interface CanvasToolbarProps {
   splitSelectedNode: () => void
   isMobile: boolean
   onOpenComponents: () => void
+  onClearCanvas: () => void
   isOnline: boolean
   persistenceHealthy: boolean
   analysisResult: AnalyzeResponse | null
@@ -48,6 +49,7 @@ function CanvasToolbar({
   splitSelectedNode,
   isMobile,
   onOpenComponents,
+  onClearCanvas,
   isOnline,
   persistenceHealthy,
   analysisResult,
@@ -311,6 +313,29 @@ function CanvasToolbar({
           </div>
         )}
       </div>
+
+      <button
+        onClick={() => {
+          if (window.confirm('Are you sure you want to clear the canvas?')) {
+            onClearCanvas()
+          }
+        }}
+        style={{
+          padding: '6px 14px',
+          borderRadius: 6,
+          border: '1px solid var(--border-color)',
+          backgroundColor: 'var(--bg-secondary)',
+          color: '#dc2626',
+          fontSize: 13,
+          fontWeight: 400,
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+          cursor: 'pointer',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+        }}
+        title="Clear Canvas"
+      >
+        Clear
+      </button>
 
       <SettingsMenu 
         theme={theme} 
