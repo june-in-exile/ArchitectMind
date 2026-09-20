@@ -73,7 +73,7 @@ export default defineConfig({
   projects: [...mockedProjects, ...mobileProjects, ...realBackendProjects],
   webServer: [
     {
-      command: 'npm run build && npm run preview -- --port 4173 --strictPort',
+      command: 'npm run build && npm run preview -- --host 127.0.0.1 --port 4173 --strictPort',
       url: PREVIEW_URL,
       // Never test whatever already listens on 4173: it may be a stale build or another project.
       reuseExistingServer: false,

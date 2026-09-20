@@ -104,10 +104,10 @@ func TestCheckInvalidConnection_DNSToService(t *testing.T) {
 	}
 }
 
-func TestCheckInvalidConnection_LoggerToService(t *testing.T) {
+func TestCheckInvalidConnection_MonitorToService(t *testing.T) {
 	ctx := makeCtx(
 		map[string]model.SystemNode{
-			"log1": {ID: "log1", ComponentType: "logger", Label: "ELK"},
+			"log1": {ID: "log1", ComponentType: "monitor", Label: "ELK"},
 			"s1":   {ID: "s1", ComponentType: "service", Label: "API"},
 		},
 		[]model.SystemEdge{
@@ -116,7 +116,7 @@ func TestCheckInvalidConnection_LoggerToService(t *testing.T) {
 	)
 	w := checkInvalidConnection(ctx)
 	if len(w) != 1 {
-		t.Errorf("expected 1 warning for Logger→Service, got %d", len(w))
+		t.Errorf("expected 1 warning for Monitor→Service, got %d", len(w))
 	}
 }
 
@@ -152,11 +152,11 @@ func TestCheckInvalidConnection_ClientToCDN_Valid(t *testing.T) {
 	}
 }
 
-func TestCheckInvalidConnection_ServiceToLogger_Valid(t *testing.T) {
+func TestCheckInvalidConnection_ServiceToMonitor_Valid(t *testing.T) {
 	ctx := makeCtx(
 		map[string]model.SystemNode{
 			"s1":   {ID: "s1", ComponentType: "service", Label: "API"},
-			"log1": {ID: "log1", ComponentType: "logger", Label: "ELK"},
+			"log1": {ID: "log1", ComponentType: "monitor", Label: "ELK"},
 		},
 		[]model.SystemEdge{
 			{ID: "e1", Source: "s1", Target: "log1", ConnectionType: "async"},
@@ -164,7 +164,7 @@ func TestCheckInvalidConnection_ServiceToLogger_Valid(t *testing.T) {
 	)
 	w := checkInvalidConnection(ctx)
 	if len(w) != 0 {
-		t.Errorf("expected 0 warnings for valid Service→Logger, got %d", len(w))
+		t.Errorf("expected 0 warnings for valid Service→Monitor, got %d", len(w))
 	}
 }
 

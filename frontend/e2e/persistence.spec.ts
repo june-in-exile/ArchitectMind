@@ -17,7 +17,7 @@ import {
 } from './support/app'
 
 async function deleteAndUndoLogger(page: Page): Promise<void> {
-  await nodeById(page, 'demo-logger').click()
+  await nodeById(page, 'demo-monitor').click()
   await page.keyboard.press('Backspace')
   await expect(canvasNodes(page)).toHaveCount(13)
   await page.waitForTimeout(SHORTCUT_REBIND_MS)
@@ -107,7 +107,7 @@ test('keeps the undo result after a reload', async ({ page }) => {
   await page.reload()
 
   await expect(canvasNodes(page)).toHaveCount(14)
-  await expect(nodeById(page, 'demo-logger')).toHaveCount(1)
+  await expect(nodeById(page, 'demo-monitor')).toHaveCount(1)
 })
 
 test('keeps the undo result after switching tabs', async ({ page }) => {
@@ -118,7 +118,7 @@ test('keeps the undo result after switching tabs', async ({ page }) => {
   await page.getByText('Untitled 1', { exact: true }).click()
 
   await expect(canvasNodes(page)).toHaveCount(14)
-  await expect(nodeById(page, 'demo-logger')).toHaveCount(1)
+  await expect(nodeById(page, 'demo-monitor')).toHaveCount(1)
 })
 
 test('only a window with changes writes the workspace', async ({ page, context }) => {

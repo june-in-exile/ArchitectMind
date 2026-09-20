@@ -12,7 +12,7 @@ flowchart TD
   demo_db_slave[(Database)]
   demo_cache{{Cache}}
   demo_storage[(Storage)]
-  demo_logger[Logger]
+  demo_monitor[Monitor]
 
   demo_client -->|DNS | sync| demo_dns
   demo_client -->|HTTPS | sync| demo_cdn
@@ -26,4 +26,4 @@ flowchart TD
   demo_service -->|DATABASE | sync| demo_db_master
   demo_service -->|DATABASE | sync| demo_db_slave
   demo_service -->|RESP | sync| demo_cache
-  demo_service -.->|HTTP | async| demo_logger
+  demo_service -.->|HTTP | async| demo_monitor

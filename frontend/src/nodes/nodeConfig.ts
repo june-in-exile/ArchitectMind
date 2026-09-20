@@ -142,7 +142,7 @@ export const NODE_TYPE_CONFIG: Record<ComponentType, NodeTypeConfig> = {
       versioning: false,
     },
   },
-  logger: {
+  monitor: {
     label: 'Monitor',
     color: '#4b5563',
     icon: '',
@@ -152,7 +152,33 @@ export const NODE_TYPE_CONFIG: Record<ComponentType, NodeTypeConfig> = {
       alerting: false,
     },
   },
-  
+  external_system: {
+    label: 'External System',
+    color: '#4b5563',
+    icon: '',
+    description: 'A third-party API or external service (e.g. Stripe, SendGrid, OAuth).',
+    defaultProperties: {
+      systemType: 'api',
+    },
+  },
+  worker: {
+    label: 'Worker',
+    color: '#4b5563',
+    icon: '',
+    description: 'Background worker, batch processor, or cron job.',
+    defaultProperties: {
+      workerType: 'cron',
+    },
+  },
+  search_engine: {
+    label: 'Search Engine',
+    color: '#4b5563',
+    icon: '',
+    description: 'Search and analytics engine for text and document retrieval.',
+    defaultProperties: {
+      indexType: 'document',
+    },
+  },
 }
 
 export function getMergedConfig(roles: ComponentType[]): {

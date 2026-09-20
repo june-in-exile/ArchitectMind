@@ -175,7 +175,7 @@ const FIREWALL_LAYERS = [
   { value: 'l7', label: 'L7 (Application)', description: 'Application-layer WAF: inspects HTTP content, detects SQLi, XSS, CSRF attacks.' },
 ]
 
-const LOGGER_PRODUCTS = [
+const MONITOR_PRODUCTS = [
   { value: '', label: '(Unspecified)', description: 'No specific observability product selected' },
   { value: 'elk', label: 'ELK Stack', description: 'Elasticsearch + Logstash + Kibana, open-source log analysis platform' },
   { value: 'prometheus', label: 'Prometheus', description: 'Open-source metrics monitoring with pull-based collection and alerting' },
@@ -187,11 +187,36 @@ const LOGGER_PRODUCTS = [
   { value: 'custom', label: 'Custom', description: 'Custom-built or other monitoring product not listed' },
 ]
 
-const LOGGER_LOG_TYPES = [
+const MONITOR_LOG_TYPES = [
   { value: 'metrics', label: 'Metrics', description: 'Numeric indicators (CPU usage, p99 latency, error rate, QPS) for dashboards and alerting' },
   { value: 'logs', label: 'Logs', description: 'Structured/unstructured text records (error log, access log, audit log) for post-mortem debugging' },
   { value: 'traces', label: 'Traces', description: 'Distributed tracing (request path across services with timing) for microservice debugging' },
   { value: 'all', label: 'All (Full Observability)', description: 'Collects metrics + logs + traces for complete observability' },
+]
+
+const WORKER_TYPES = [
+  { value: 'cron', label: 'Cron (Scheduled)', description: 'Runs automatically at scheduled times (e.g. daily backup, nightly settlement).' },
+  { value: 'event_driven', label: 'Event Driven / Queue-based', description: 'Triggered by events or queue messages (e.g. async email, video transcoding).' },
+  { value: 'stream', label: 'Stream / Batch', description: 'Processes massive data streams or large batches (e.g. clickstream analysis, reconciliation).' },
+  { value: 'polling', label: 'Polling / Long-running', description: 'Runs continuously in the background, polling for updates (e.g. web crawlers).' },
+  { value: 'edge', label: 'Edge / Serverless', description: 'Runs lightweight tasks close to users (e.g. Cloudflare Workers).' },
+  { value: 'internal', label: 'Concurrency / Internal', description: 'Spawns internal threads/processes to share heavy loads (e.g. Node Worker Threads).' },
+  { value: 'janitor', label: 'Janitor / Maintenance', description: 'Background cleanup tasks (e.g. cache eviction, DB vacuum).' },
+]
+
+const SEARCH_ENGINE_INDEX_TYPES = [
+  { value: 'document', label: 'Document (Full-text)', description: 'Inverted index for full-text search (e.g. Elasticsearch).' },
+  { value: 'vector', label: 'Vector (Similarity)', description: 'Embedding vectors for AI/semantic search (e.g. Milvus, Pinecone).' },
+  { value: 'keyword', label: 'Keyword (Exact Match)', description: 'Exact keyword matching, filtering, tagging.' },
+]
+
+const EXTERNAL_SYSTEM_TYPES = [
+  { value: 'api', label: 'REST/GraphQL API', description: 'Synchronous API calls to third-party providers.' },
+  { value: 'webhook', label: 'Webhook Receiver', description: 'Listens for async callbacks from third-party services.' },
+  { value: 'oauth', label: 'OAuth/Identity', description: 'Authentication provider (e.g. Auth0, Cognito, Google Sign-in).' },
+  { value: 'payment', label: 'Payment Gateway', description: 'Payment processing (e.g. Stripe, PayPal).' },
+  { value: 'email', label: 'Email/SMS Provider', description: 'Transactional messaging service (e.g. SendGrid, Twilio).' },
+  { value: 'custom', label: 'Custom', description: 'Other external dependencies.' },
 ]
 
 const SERVICE_LANGUAGES = [
@@ -1246,7 +1271,7 @@ export default function PropertyPanel({
     </>
   )
 
-  const renderLoggerSection = () => (
+  const renderMonitorSection = () => (
     <>
       <div style={{ marginBottom: 16 }}>
         <label
@@ -1259,12 +1284,12 @@ export default function PropertyPanel({
           value={(properties.product as string) || ''}
           onChange={(e) => handlePropertyChange('product', e.target.value || undefined)}
           title={getTooltip(
-            LOGGER_PRODUCTS.find(p => p.value === ((properties.product as string) || ''))?.label || '',
-            LOGGER_PRODUCTS.find(p => p.value === ((properties.product as string) || ''))?.description
+            MONITOR_PRODUCTS.find(p => p.value === ((properties.product as string) || ''))?.label || '',
+            MONITOR_PRODUCTS.find(p => p.value === ((properties.product as string) || ''))?.description
           )}
           style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
-          {LOGGER_PRODUCTS.map((p) => (
+          {MONITOR_PRODUCTS.map((p) => (
             <option key={p.value} value={p.value} title={p.description}>{p.label}</option>
           ))}
         </select>
@@ -1281,12 +1306,12 @@ export default function PropertyPanel({
           value={(properties.logType as string) || 'all'}
           onChange={(e) => handlePropertyChange('logType', e.target.value)}
           title={getTooltip(
-            LOGGER_LOG_TYPES.find(opt => opt.value === ((properties.logType as string) || 'all'))?.label || '',
-            LOGGER_LOG_TYPES.find(opt => opt.value === ((properties.logType as string) || 'all'))?.description
+            MONITOR_LOG_TYPES.find(opt => opt.value === ((properties.logType as string) || 'all'))?.label || '',
+            MONITOR_LOG_TYPES.find(opt => opt.value === ((properties.logType as string) || 'all'))?.description
           )}
           style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
         >
-          {LOGGER_LOG_TYPES.map((opt) => (
+          {MONITOR_LOG_TYPES.map((opt) => (
             <option key={opt.value} value={opt.value} title={opt.description}>{opt.label}</option>
           ))}
         </select>
@@ -1400,6 +1425,124 @@ export default function PropertyPanel({
     </>
   )
 
+  const renderWorkerSection = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          Worker Type
+        </label>
+        <select
+          value={(properties.workerType as string) || 'cron'}
+          onChange={(e) => handlePropertyChange('workerType', e.target.value)}
+          title={getTooltip(
+            WORKER_TYPES.find(opt => opt.value === ((properties.workerType as string) || 'cron'))?.label || '',
+            WORKER_TYPES.find(opt => opt.value === ((properties.workerType as string) || 'cron'))?.description
+          )}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        >
+          {WORKER_TYPES.map((opt) => (
+            <option key={opt.value} value={opt.value} title={opt.description}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          Schedule (Cron Expression)
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. 0 0 * * *"
+          value={(properties.schedule as string) || ''}
+          onChange={(e) => handlePropertyChange('schedule', e.target.value || undefined)}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          Concurrency
+        </label>
+        <input
+          type="number"
+          min="1"
+          placeholder="1"
+          value={(properties.concurrency as number) || ''}
+          onChange={(e) => handlePropertyChange('concurrency', e.target.value ? parseInt(e.target.value, 10) : undefined)}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        />
+      </div>
+    </>
+  )
+
+  const renderSearchEngineSection = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          Product
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. Elasticsearch, Solr"
+          value={(properties.product as string) || ''}
+          onChange={(e) => handlePropertyChange('product', e.target.value || undefined)}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        />
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          Index Type
+        </label>
+        <select
+          value={(properties.indexType as string) || 'document'}
+          onChange={(e) => handlePropertyChange('indexType', e.target.value)}
+          title={getTooltip(
+            SEARCH_ENGINE_INDEX_TYPES.find(opt => opt.value === ((properties.indexType as string) || 'document'))?.label || '',
+            SEARCH_ENGINE_INDEX_TYPES.find(opt => opt.value === ((properties.indexType as string) || 'document'))?.description
+          )}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        >
+          {SEARCH_ENGINE_INDEX_TYPES.map((opt) => (
+            <option key={opt.value} value={opt.value} title={opt.description}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+    </>
+  )
+
+  const renderExternalSystemSection = () => (
+    <>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          System Type
+        </label>
+        <select
+          value={(properties.systemType as string) || 'api'}
+          onChange={(e) => handlePropertyChange('systemType', e.target.value)}
+          title={getTooltip(
+            EXTERNAL_SYSTEM_TYPES.find(opt => opt.value === ((properties.systemType as string) || 'api'))?.label || '',
+            EXTERNAL_SYSTEM_TYPES.find(opt => opt.value === ((properties.systemType as string) || 'api'))?.description
+          )}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        >
+          {EXTERNAL_SYSTEM_TYPES.map((opt) => (
+            <option key={opt.value} value={opt.value} title={opt.description}>{opt.label}</option>
+          ))}
+        </select>
+      </div>
+      <div style={{ marginBottom: 16 }}>
+        <label style={{ display: 'block', marginBottom: 4, fontSize: 13, fontWeight: 500, color: 'var(--text-secondary)' }}>
+          Provider
+        </label>
+        <input
+          type="text"
+          placeholder="e.g. Stripe, SendGrid"
+          value={(properties.provider as string) || ''}
+          onChange={(e) => handlePropertyChange('provider', e.target.value || undefined)}
+          style={{ width: '100%', padding: '6px 8px', border: '1px solid var(--border-color)', borderRadius: 4, fontSize: 13, backgroundColor: 'var(--bg-primary)', color: 'var(--text-primary)' }}
+        />
+      </div>
+    </>
+  )
+
   const renderRoleProperties = (role: ComponentType) => {
     switch (role) {
       case 'client': return renderClientSection()
@@ -1413,14 +1556,17 @@ export default function PropertyPanel({
       case 'message_queue': return renderMessageQueueSection()
       case 'cache': return renderCacheSection()
       case 'firewall': return renderFirewallSection()
-      case 'logger': return renderLoggerSection()
+      case 'monitor': return renderMonitorSection()
+      case 'worker': return renderWorkerSection()
+      case 'search_engine': return renderSearchEngineSection()
+      case 'external_system': return renderExternalSystemSection()
       case 'service': return renderServiceSection()
       default: return null
     }
   }
 
   const supportsReplicas = roles.some(role => 
-    ['service', 'database', 'load_balancer', 'cache', 'reverse_proxy', 'firewall', 'logger'].includes(role)
+    ['service', 'database', 'load_balancer', 'cache', 'reverse_proxy', 'firewall', 'monitor', 'worker', 'search_engine'].includes(role)
   )
 
   return (

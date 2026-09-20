@@ -79,6 +79,12 @@ const SidebarItem = memo(({ type, onDragStart }: { type: ComponentType, onDragSt
 })
 
 function Sidebar({}: SidebarProps) {
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    const saved = localStorage.getItem('architectmind:sidebarWidth')
+    return saved ? parseInt(saved, 10) : 200
+  })
+  const isDraggingRef = useRef(false)
+
   const onDragStart = (
     event: React.DragEvent,
     componentType: ComponentType
@@ -88,72 +94,112 @@ function Sidebar({}: SidebarProps) {
   }
 
   return (
-    <aside
-      style={{
-        width: 200,
-        padding: 0,
-        borderRight: '1px solid var(--border-color)',
-        backgroundColor: 'var(--bg-secondary)',
-        overflowY: 'auto',
-        display: 'flex',
-        flexDirection: 'column',
-      }}
-    >
-      {/* Brand Header at Top-Left */}
-      <div
+    <div style={{ position: 'relative', height: '100%', display: 'flex' }}>
+      <aside
         style={{
+          width: sidebarWidth,
+          padding: 0,
+          borderRight: '1px solid var(--border-color)',
+          backgroundColor: 'var(--bg-secondary)',
+          overflowY: 'auto',
           display: 'flex',
-          alignItems: 'center',
-          gap: 10,
-          padding: '20px 16px',
-          borderBottom: '1px solid var(--border-color)',
-          marginBottom: 16,
-          backgroundColor: 'var(--bg-primary)',
+          flexDirection: 'column',
         }}
       >
-        <img 
-          src={logo} 
-          alt="ArchitectMind Logo" 
-          style={{ 
-            width: 36, 
-            height: 36, 
-            borderRadius: 8,
-            objectFit: 'contain'
-          }} 
-        />
-        <h2
+        {/* Brand Header at Top-Left */}
+        <div
           style={{
-            margin: 0,
-            fontSize: 22,
-            fontWeight: 700,
-            letterSpacing: '-0.01em',
-            color: 'var(--text-primary)',
-            fontFamily: 'var(--font-hand)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            padding: '20px 16px',
+            borderBottom: '1px solid var(--border-color)',
+            marginBottom: 16,
+            backgroundColor: 'var(--bg-primary)',
           }}
         >
-          Architect<span style={{ color: 'var(--accent)' }}>Mind</span>
-        </h2>
-      </div>
-
-      <div style={{ padding: '0 16px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <h3
-          style={{
-            display: 'block',
-            marginBottom: 12,
-            fontSize: 13,
-            fontWeight: 500,
-            color: 'var(--text-secondary)',
-          }}
-        >
-          Components
-        </h3>
-        <div style={{ flex: 1 }}>
-          {COMPONENT_TYPES.map((type) => (
-            <SidebarItem key={type} type={type} onDragStart={onDragStart} />
-          ))}
+          <img 
+            src={logo} 
+            alt="ArchitectMind Logo" 
+            style={{ 
+              width: 36, 
+              height: 36, 
+              borderRadius: 8,
+              objectFit: 'contain'
+            }} 
+          />
+          <h2
+            style={{
+              margin: 0,
+              fontSize: 22,
+              fontWeight: 700,
+              letterSpacing: '-0.01em',
+              color: 'var(--text-primary)',
+              fontFamily: 'var(--font-hand)',
+            }}
+          >
+            Architect<span style={{ color: 'var(--accent)' }}>Mind</span>
+          </h2>
         </div>
-      </div>
-    </aside>
+
+        <div style={{ padding: '0 16px', flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <h3
+            style={{
+              display: 'block',
+              marginBottom: 12,
+              fontSize: 13,
+              fontWeight: 500,
+              color: 'var(--text-secondary)',
+              textAlign: 'center',
+              width: '100%',
+            }}
+          >
+            Components
+          </h3>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
+            {COMPONENT_TYPES.map((type) => (
+              <SidebarItem key={type} type={type} onDragStart={onDragStart} />
+            ))}
+          </div>
+        </div>
+      </aside>
+      <div
+        onMouseDown={(e) => {
+          e.preventDefault()
+          isDraggingRef.current = true
+          const startX = e.clientX
+          const startWidth = sidebarWidth
+          const handleMouseMove = (moveEvent: MouseEvent) => {
+            const delta = moveEvent.clientX - startX
+            const newWidth = Math.max(160, Math.min(400, startWidth + delta))
+            setSidebarWidth(newWidth)
+          }
+          const handleMouseUp = (upEvent: MouseEvent) => {
+            isDraggingRef.current = false
+            document.removeEventListener('mousemove', handleMouseMove)
+            document.removeEventListener('mouseup', handleMouseUp)
+            
+            // Save final width
+            const delta = upEvent.clientX - startX
+            const finalWidth = Math.max(160, Math.min(400, startWidth + delta))
+            localStorage.setItem('architectmind:sidebarWidth', finalWidth.toString())
+          }
+          document.addEventListener('mousemove', handleMouseMove)
+          document.addEventListener('mouseup', handleMouseUp)
+        }}
+        style={{
+          position: 'absolute',
+          right: -4,
+          top: 0,
+          bottom: 0,
+          width: 8,
+          cursor: 'col-resize',
+          zIndex: 20,
+          backgroundColor: 'transparent',
+        }}
+        title="Resize panel"
+      />
+    </div>
   )
 }
 

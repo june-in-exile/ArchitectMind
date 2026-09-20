@@ -216,7 +216,7 @@ func TestPostTopology_HealthyArchitecture_NoWarnings(t *testing.T) {
 				"properties": map[string]interface{}{"evictionPolicy": "lru", "ttlSeconds": float64(300)}},
 			{"id": "db1", "componentType": "database", "label": "PostgreSQL", "position": map[string]interface{}{"x": 500, "y": 100},
 				"properties": map[string]interface{}{"dbType": "sql", "readWriteRatio": 0.7}},
-			{"id": "log1", "componentType": "logger", "label": "Datadog", "position": map[string]interface{}{"x": 600, "y": 0},
+			{"id": "log1", "componentType": "monitor", "label": "Datadog", "position": map[string]interface{}{"x": 600, "y": 0},
 				"properties": map[string]interface{}{"logType": "all", "alerting": true}},
 		},
 		"edges": []map[string]interface{}{

@@ -2,6 +2,7 @@ import type { Dispatch, RefObject, SetStateAction } from 'react'
 import type { Edge, Node } from '@xyflow/react'
 import type { AnalyzeResponse, Warning } from '../types/topology'
 import type { Theme } from '../theme/themePreference'
+import { practiceQuestions } from '../types/practice'
 import ToolbarButton from './ToolbarButton'
 import SettingsMenu from './SettingsMenu'
 
@@ -28,6 +29,12 @@ interface CanvasToolbarProps {
   handleTwitter: () => void
   handleYouTube: () => void
   handleGoogle: () => void
+  activePracticeId: string | null
+  onSelectPractice: (id: string | null) => void
+  showPractice: boolean
+  setShowPractice: Dispatch<SetStateAction<boolean>>
+  practiceRef: RefObject<HTMLDivElement | null>
+  practiceTestState?: 'idle' | 'running' | 'finished'
 }
 
 function CanvasToolbar({
@@ -53,6 +60,12 @@ function CanvasToolbar({
   handleTwitter,
   handleYouTube,
   handleGoogle,
+  activePracticeId,
+  onSelectPractice,
+  showPractice,
+  setShowPractice,
+  practiceRef,
+  practiceTestState,
 }: CanvasToolbarProps) {
   return (
     <div
@@ -135,6 +148,101 @@ function CanvasToolbar({
         </div>
       )}
       <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+        <div ref={practiceRef} style={{ position: 'relative' }}>
+          <button
+            onClick={() => setShowPractice(prev => !prev)}
+            style={{
+              padding: '6px 14px',
+              borderRadius: 6,
+              border: '1px solid',
+              borderColor: activePracticeId ? 'var(--accent)' : 'var(--border-color)',
+              backgroundColor: 'var(--bg-secondary)',
+              color: activePracticeId ? 'var(--accent)' : 'var(--text-primary)',
+              fontSize: 13,
+              fontWeight: 400,
+              fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+              cursor: 'pointer',
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}
+          >
+            {activePracticeId 
+              ? `Practice: ${practiceQuestions.find(q => q.id === activePracticeId)?.title || 'Question'}`
+              : 'Practice ▾'}
+          </button>
+          {showPractice && (
+            <div style={{
+              position: 'absolute',
+              top: '100%',
+              right: 0,
+              marginTop: 6,
+              minWidth: 130,
+              borderRadius: 6,
+              border: '1px solid var(--border-color)',
+              backgroundColor: 'var(--bg-secondary)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+              overflow: 'hidden',
+              zIndex: 100,
+            }}>
+              {practiceQuestions.map(({ id, title }) => {
+                const isDisabled = activePracticeId !== null && practiceTestState === 'running' && activePracticeId !== id;
+                return (
+                  <button
+                    key={id}
+                    onClick={() => { if (!isDisabled) { onSelectPractice(id); setShowPractice(false); } }}
+                    disabled={isDisabled}
+                    style={{
+                      display: 'block',
+                      width: '100%',
+                      padding: '10px 16px',
+                      border: 'none',
+                      backgroundColor: 'transparent',
+                      color: isDisabled ? 'var(--text-secondary)' : 'var(--text-primary)',
+                      fontSize: 14,
+                      fontWeight: 400,
+                      textAlign: 'left',
+                      whiteSpace: 'nowrap',
+                      cursor: isDisabled ? 'not-allowed' : 'pointer',
+                    }}
+                    onMouseEnter={e => { if (!isDisabled) e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)' }}
+                    onMouseLeave={e => { if (!isDisabled) e.currentTarget.style.backgroundColor = 'transparent' }}
+                  >
+                    {title}
+                  </button>
+                )
+              })}
+              {activePracticeId && (
+                <button
+                  onClick={() => {
+                    try {
+                      localStorage.removeItem(`architectmind:practiceState:${activePracticeId}`)
+                      localStorage.removeItem(`architectmind:practiceEndTime:${activePracticeId}`)
+                    } catch {}
+                    onSelectPractice(null)
+                    setShowPractice(false)
+                  }}
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '10px 16px',
+                    borderTop: '1px solid var(--border-color)',
+                    backgroundColor: 'transparent',
+                    color: 'var(--warning)',
+                    fontSize: 14,
+                    fontWeight: 400,
+                    textAlign: 'left',
+                    whiteSpace: 'nowrap',
+                    cursor: 'pointer',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = 'var(--bg-tertiary)' }}
+                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                >
+                  Exit Practice
+                </button>
+              )}
+            </div>
+          )}
+        </div>
+
         <div ref={presetsRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setShowPresets(prev => !prev)}

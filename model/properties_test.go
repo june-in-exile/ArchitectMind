@@ -129,16 +129,16 @@ func TestParseNodeProperties_Firewall(t *testing.T) {
 
 func TestParseNodeProperties_Logger(t *testing.T) {
 	node := SystemNode{
-		ID: "1", ComponentType: "logger", Label: "ELK",
+		ID: "1", ComponentType: "monitor", Label: "ELK",
 		Properties: map[string]interface{}{"logType": "metrics", "alerting": false},
 	}
 	props, err := ParseNodeProperties(node)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	logProps, ok := props.(*LoggerProperties)
+	logProps, ok := props.(*MonitorProperties)
 	if !ok {
-		t.Fatal("expected *LoggerProperties")
+		t.Fatal("expected *MonitorProperties")
 	}
 	if logProps.LogType != "metrics" {
 		t.Errorf("expected metrics, got %s", logProps.LogType)

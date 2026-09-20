@@ -115,7 +115,7 @@ func validate(t model.SystemTopology) []Warning {
 	warnings = append(warnings, checkDatabasePerService(ctx)...)
 	warnings = append(warnings, checkCacheOnly(ctx)...)
 	warnings = append(warnings, checkMissingFirewall(ctx)...)
-	warnings = append(warnings, checkMissingLogger(ctx)...)
+	warnings = append(warnings, checkMissingMonitor(ctx)...)
 	warnings = append(warnings, checkFirewallMonitorMode(ctx)...)
 	warnings = append(warnings, checkFirewallL3Only(ctx)...)
 	warnings = append(warnings, checkIncompleteObservability(ctx)...)

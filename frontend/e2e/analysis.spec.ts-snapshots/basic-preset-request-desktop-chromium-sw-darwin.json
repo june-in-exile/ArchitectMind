@@ -155,9 +155,9 @@
       "properties": {}
     },
     {
-      "id": "demo-logger",
-      "componentType": "logger",
-      "label": "Logger",
+      "id": "demo-monitor",
+      "componentType": "monitor",
+      "label": "Monitor",
       "position": {
         "x": 150,
         "y": 1050
@@ -254,9 +254,9 @@
       "protocol": "resp"
     },
     {
-      "id": "e-service-logger",
+      "id": "e-service-monitor",
       "source": "demo-service",
-      "target": "demo-logger",
+      "target": "demo-monitor",
       "connectionType": "async",
       "protocol": "http"
     }

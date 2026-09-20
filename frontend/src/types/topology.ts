@@ -11,7 +11,10 @@ export type ComponentType =
   | 'storage'
   | 'reverse_proxy'
   | 'firewall'
-  | 'logger'
+  | 'monitor'
+  | 'external_system'
+  | 'worker'
+  | 'search_engine'
 
 export type ConnectionType = 'sync' | 'async' | 'replication' | 'cdn_origin' | 'unspecified'
 
@@ -102,7 +105,25 @@ export interface FirewallProperties {
   replicas?: number
 }
 
-export interface LoggerProperties {
+export interface WorkerProperties {
+  workerType: 'cron' | 'event_driven' | 'stream' | 'polling' | 'edge' | 'internal' | 'janitor'
+  schedule?: string
+  concurrency?: number
+}
+
+export interface SearchEngineProperties {
+  product?: string
+  clusterSize?: number
+  indexType?: 'document' | 'vector' | 'keyword'
+}
+
+export interface ExternalSystemProperties {
+  systemType: 'api' | 'webhook' | 'oauth' | 'payment' | 'email' | 'custom'
+  provider?: string
+}
+
+
+export interface MonitorProperties {
   product?: 'elk' | 'prometheus' | 'grafana' | 'datadog' | 'splunk' | 'cloudwatch' | 'jaeger' | 'custom'
   logType: 'metrics' | 'logs' | 'traces' | 'all'
   alerting: boolean
@@ -142,7 +163,10 @@ export type ComponentProperties =
   | ServiceProperties
   | ReverseProxyProperties
   | FirewallProperties
-  | LoggerProperties
+  | MonitorProperties
+  | WorkerProperties
+  | ExternalSystemProperties
+  | SearchEngineProperties
   | ClientProperties
   | DNSProperties
   | CDNProperties

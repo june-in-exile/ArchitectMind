@@ -26,6 +26,9 @@ const SIDEBAR_COMPONENTS = [
   'Database',
   'Storage',
   'Monitor',
+  'External System',
+  'Worker',
+  'Search Engine',
 ]
 
 const THEMES = [

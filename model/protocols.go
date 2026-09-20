@@ -124,10 +124,10 @@ var ForbiddenConnections = map[string][]string{
 
 	// DNS is only relevant for Clients
 	"dns": {"service", "database", "cache", "message_queue", "storage",
-		"load_balancer", "reverse_proxy", "api_gateway", "firewall", "cdn", "logger"},
+		"load_balancer", "reverse_proxy", "api_gateway", "firewall", "cdn", "monitor"},
 
-	// Logger/Monitor are passive sinks, should not have outgoing connections
-	"logger": {"service", "database", "cache", "message_queue", "storage",
+	// Monitor are passive sinks, should not have outgoing connections
+	"monitor": {"service", "database", "cache", "message_queue", "storage",
 		"client", "cdn", "load_balancer", "reverse_proxy", "api_gateway", "firewall", "dns"},
 
 	// Client should not connect directly to Data Layer
@@ -146,7 +146,7 @@ var ForbiddenConnectionReasons = map[string]map[string]string{
 	"message_queue": {"client": "Client should not directly consume MQ; it should be processed and pushed by a Service"},
 	"cdn":           {"*": "CDN should only origin pull to Storage or Entry nodes and should not access the data layer"},
 	"dns":           {"*": "DNS only performs domain resolution and does not route actual traffic to backend components"},
-	"logger":        {"*": "Logger/Monitor is a passive sink and should not initiate connections to other components"},
+	"monitor":        {"*": "Monitor is a passive sink and should not initiate connections to other components"},
 	"client": {
 		"database": "Client should not operate directly on the database. Add an API Gateway or Service layer in between for authentication and data abstraction.",
 		"cache":    "Direct cache access by Client is not recommended. This can lead to cache penetration risks or data leaks. Cache logic should be encapsulated in a backend Service.",

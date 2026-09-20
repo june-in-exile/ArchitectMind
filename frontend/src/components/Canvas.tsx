@@ -27,6 +27,9 @@ import { generateNodeId } from '../utils/nodeId'
 import { useOnlineStatus } from '../hooks/useOnlineStatus'
 import { useIsMobile } from '../hooks/useIsMobile'
 import ComponentDrawer from './ComponentDrawer'
+import PracticeBrief from './PracticeBrief'
+import { practiceQuestions } from '../types/practice'
+import { mockSubmitDesign } from '../api/mockAi'
 import type {
   ComponentType,
   SystemTopology,
@@ -101,6 +104,26 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
   const [showWarnings, setShowWarnings] = useState(false)
   const [showPresets, setShowPresets] = useState(false)
   const presetsRef = useRef<HTMLDivElement>(null)
+  const [showPractice, setShowPractice] = useState(false)
+  const practiceRef = useRef<HTMLDivElement>(null)
+  const [activePracticeId, setActivePracticeId] = useState<string | null>(() => {
+    try {
+      return localStorage.getItem('architectmind:activePracticeId') || null
+    } catch {
+      return null
+    }
+  })
+  const [practiceTestState, setPracticeTestState] = useState<'idle' | 'running' | 'finished'>('idle')
+
+  useEffect(() => {
+    if (activePracticeId) {
+      localStorage.setItem('architectmind:activePracticeId', activePracticeId)
+    } else {
+      localStorage.removeItem('architectmind:activePracticeId')
+      setPracticeTestState('idle')
+    }
+  }, [activePracticeId])
+  const [isSubmittingPractice, setIsSubmittingPractice] = useState(false)
   const [dismissedWarnings, setDismissedWarnings] = useState<Set<number>>(new Set())
   const [systemParams, setSystemParams] = useState<SystemParams>(() => initialParams ?? {})
   const isOnline = useOnlineStatus()
@@ -121,15 +144,18 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
   }, [panelHeight])
 
   useEffect(() => {
-    if (!showPresets) return
+    if (!showPresets && !showPractice) return
     const handleClickOutside = (e: MouseEvent) => {
-      if (presetsRef.current && !presetsRef.current.contains(e.target as HTMLElement)) {
+      if (showPresets && presetsRef.current && !presetsRef.current.contains(e.target as HTMLElement)) {
         setShowPresets(false)
+      }
+      if (showPractice && practiceRef.current && !practiceRef.current.contains(e.target as HTMLElement)) {
+        setShowPractice(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside, true)
     return () => document.removeEventListener('mousedown', handleClickOutside, true)
-  }, [showPresets])
+  }, [showPresets, showPractice])
 
   const onDragStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
@@ -989,7 +1015,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
       { id: 'demo-db-slave', type: 'architecture', position: { x: 450, y: 1250 }, data: { label: 'Database', componentType: 'database', properties: { dbType: 'sql' } } },
       { id: 'demo-cache', type: 'architecture', position: { x: 650, y: 1250 }, data: { label: 'Cache', componentType: 'cache', properties: { cacheType: 'distributed' } } },
       { id: 'demo-storage', type: 'architecture', position: { x: 850, y: 850 }, data: { label: 'Storage', componentType: 'storage', properties: {} } },
-      { id: 'demo-logger', type: 'architecture', position: { x: 150, y: 1050 }, data: { label: 'Logger', componentType: 'logger', properties: { logType: 'all', retentionDays: 30 } } }
+      { id: 'demo-monitor', type: 'architecture', position: { x: 150, y: 1050 }, data: { label: 'Monitor', componentType: 'monitor', properties: { logType: 'all', retentionDays: 30 } } }
     ]
 
     const demoEdges: Edge[] = [
@@ -1005,7 +1031,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
       { id: 'e-service-dbm', source: 'demo-service', target: 'demo-db-master', sourceHandle: 'bottom-source', targetHandle: 'top-target', data: { connectionType: 'sync', protocol: 'database' }, style: { stroke: defaultEdgeColor, strokeWidth: 2 }, type: 'handdrawn', animated: false },
       { id: 'e-service-dbs', source: 'demo-service', target: 'demo-db-slave', sourceHandle: 'bottom-source', targetHandle: 'top-target', data: { connectionType: 'sync', protocol: 'database' }, style: { stroke: defaultEdgeColor, strokeWidth: 2 }, type: 'handdrawn', animated: false },
       { id: 'e-service-cache', source: 'demo-service', target: 'demo-cache', sourceHandle: 'bottom-source', targetHandle: 'top-target', data: { connectionType: 'sync', protocol: 'resp' }, style: { stroke: defaultEdgeColor, strokeWidth: 2 }, type: 'handdrawn', animated: false },
-      { id: 'e-service-logger', source: 'demo-service', target: 'demo-logger', sourceHandle: 'left-source', targetHandle: 'right-target', data: { connectionType: 'async', protocol: 'http' }, style: { stroke: defaultEdgeColor, strokeWidth: 2 }, type: 'handdrawn', animated: false }
+      { id: 'e-service-monitor', source: 'demo-service', target: 'demo-monitor', sourceHandle: 'left-source', targetHandle: 'right-target', data: { connectionType: 'async', protocol: 'http' }, style: { stroke: defaultEdgeColor, strokeWidth: 2 }, type: 'handdrawn', animated: false }
     ]
 
     setNodes(demoNodes)
@@ -1054,7 +1080,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
       { id: 'tw-cache', type: 'architecture', position: { x: 550, y: 1700 }, data: { label: 'Cache (Redis)', componentType: 'cache', properties: { cacheType: 'distributed', product: 'redis', evictionPolicy: 'lru', ttlSeconds: 3600 } } },
       
       // Observability
-      { id: 'tw-monitor', type: 'architecture', position: { x: 50, y: 1200 }, data: { label: 'Monitor', componentType: 'logger', properties: { product: 'prometheus', logType: 'all', alerting: true } } },
+      { id: 'tw-monitor', type: 'architecture', position: { x: 50, y: 1200 }, data: { label: 'Monitor', componentType: 'monitor', properties: { product: 'prometheus', logType: 'all', alerting: true } } },
     ]
 
     const edgeStyle = { stroke: defaultEdgeColor, strokeWidth: 2 }
@@ -1144,7 +1170,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
       { id: 'yt-storage', type: 'architecture', position: { x: 1000, y: 1750 }, data: { label: 'Storage (S3)', componentType: 'storage', properties: { storageClass: 'standard' } } },
 
       // Observability
-      { id: 'yt-monitor', type: 'architecture', position: { x: 100, y: 1250 }, data: { label: 'Monitor', componentType: 'logger', properties: { product: 'datadog', logType: 'all', alerting: true } } },
+      { id: 'yt-monitor', type: 'architecture', position: { x: 100, y: 1250 }, data: { label: 'Monitor', componentType: 'monitor', properties: { product: 'datadog', logType: 'all', alerting: true } } },
     ]
 
     const edgeStyle = { stroke: defaultEdgeColor, strokeWidth: 2 }
@@ -1241,7 +1267,7 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
       { id: 'gg-storage', type: 'architecture', position: { x: 1000, y: 1700 }, data: { label: 'Storage (HTML)', componentType: 'storage', properties: { storageClass: 'standard' } } },
 
       // Observability
-      { id: 'gg-monitor', type: 'architecture', position: { x: 0, y: 1200 }, data: { label: 'Monitor', componentType: 'logger', properties: { product: 'elk', logType: 'all', alerting: true } } },
+      { id: 'gg-monitor', type: 'architecture', position: { x: 0, y: 1200 }, data: { label: 'Monitor', componentType: 'monitor', properties: { product: 'elk', logType: 'all', alerting: true } } },
     ]
 
     const edgeStyle = { stroke: defaultEdgeColor, strokeWidth: 2 }
@@ -1315,6 +1341,12 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
         handleTwitter={handleTwitter}
         handleYouTube={handleYouTube}
         handleGoogle={handleGoogle}
+        activePracticeId={activePracticeId}
+        onSelectPractice={setActivePracticeId}
+        showPractice={showPractice}
+        setShowPractice={setShowPractice}
+        practiceRef={practiceRef}
+        practiceTestState={practiceTestState}
       />
     <div ref={reactFlowWrapper} style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', position: 'relative', minWidth: 0 }}>
@@ -1419,6 +1451,25 @@ function Canvas({ theme, setTheme, initialNodes = [], initialEdges = [], initial
               size={1.5}
               color={gridColor}
             />
+
+            {activePracticeId && practiceQuestions.find(q => q.id === activePracticeId) && (
+              <PracticeBrief
+                question={practiceQuestions.find(q => q.id === activePracticeId)!}
+                onSubmit={async () => {
+                  setIsSubmittingPractice(true)
+                  try {
+                    const result = await mockSubmitDesign(nodes, edges, activePracticeId)
+                    alert(`AI Feedback (Score: ${result.score}):\n${result.message}`)
+                  } catch (e) {
+                    alert('Error submitting for review')
+                  } finally {
+                    setIsSubmittingPractice(false)
+                  }
+                }}
+                isSubmitting={isSubmittingPractice}
+                onStateChange={setPracticeTestState}
+              />
+            )}
             
             {analysisResult && (
               <div style={{

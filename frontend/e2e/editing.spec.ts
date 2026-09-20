@@ -120,12 +120,12 @@ test('Ctrl+M merges two selected nodes and undo restores them', async ({ page })
 })
 
 test('Backspace deletes the selected node and its edges', async ({ page }) => {
-  await nodeById(page, 'demo-logger').click()
+  await nodeById(page, 'demo-monitor').click()
 
   await page.keyboard.press('Backspace')
 
   await expect(canvasNodes(page)).toHaveCount(13)
-  await expect(nodeById(page, 'demo-logger')).toHaveCount(0)
-  await expect(edgeById(page, 'e-service-logger')).toHaveCount(0)
+  await expect(nodeById(page, 'demo-monitor')).toHaveCount(0)
+  await expect(edgeById(page, 'e-service-monitor')).toHaveCount(0)
   await expect(canvasEdges(page)).toHaveCount(12)
 })
