@@ -2,30 +2,38 @@
 
 [🌐 Live Demo](https://architect-mind.vercel.app/)
 
-![ArchitectMind Demo](./demo.png)
-
 ArchitectMind is a web-based tool for visualizing and analyzing system architectures. It provides an intuitive interactive canvas where users can drag and drop infrastructure components (such as Load Balancers, Databases, Services, etc.) and receive architectural logic validation and best practice recommendations via a backend API.
 
-## 🚀 Features
+## 🎯 Use Cases
 
-- **Interactive Canvas**: Based on React Flow v12, supports node drag-and-drop, connections, and custom properties.
-- **Component Sidebar**: A standard library of 13 system design components (Client, DNS, CDN, Firewall, Load Balancer, Reverse Proxy, API Gateway, Service, Message Queue, Cache, Database, Storage, Monitor). Collapsible with `⌘/Ctrl + B`.
-- **Real-time Architecture Validation**: Analysis runs automatically (debounced) whenever the topology or system parameters change — no manual trigger needed. 45 automated rules check whether component types and connection logic align with system design best practices, with a live `N/45 rules passed` indicator.
-- **Custom Analysis Parameters**: Set system parameters like DAU, QPS, Storage, and Availability targets in the draggable/resizable **Params** panel to generate more precise capacity planning recommendations.
-- **Multi-tab Support**: Open multiple design canvases simultaneously for architecture comparison and multi-project workflows.
-- **Auto-save**: Every tab, its canvas, and its system parameters are saved in your browser and restored when you come back.
-- **Installable & Offline-ready (PWA)**: Install ArchitectMind as an app; it opens offline, and analysis resumes when the connection returns.
-- **Mobile-friendly**: On a phone the panels become bottom sheets, you add components by tapping the canvas, and one finger pans while two fingers zoom.
-- **One-click Presets**: Classic system design templates (Basic, Twitter, YouTube, Google) to help you get started quickly.
+- **System Design Interview Prep**: Use the **Practice** mode to simulate timed, constrained interviews (e.g., DAU, QPS limits) and get automated feedback on your architecture.
+- **Architecture Planning**: Draft realistic topologies for new projects and test their viability against simulated capacity parameters.
+- **Educational Tool**: Learn from **Demo** presets of massive-scale architectures (Twitter, YouTube, Google) and modify them to understand system tradeoffs.
+- **Team Collaboration**: Export designs to multiple formats (PNG, PDF, Mermaid, Excalidraw) to attach to technical design docs (RFCs).
+
+## 🚀 Key Features
+
+- **System Design Practice Mode**: Built-in mock interview questions (e.g., TinyURL, Instagram Feed) with strict requirements and a countdown timer.
+- **One-click Demo Presets**: Instantly load classic architectures (Basic, Twitter, YouTube, Google) as a starting point.
+- **Real-time Architecture Validation**: 45 automated backend rules check your topology against best practices for Availability, Performance, Security, and Scalability.
+- **Capacity Planning**: Set system parameters (DAU, QPS, Storage) to receive dynamic warnings if your architecture cannot handle the specified load.
+- **Interactive Canvas**: Drag and drop 13 system components, connect them, and modify their properties.
+- **Robust Workflows**: Multi-tab support, offline-ready PWA, auto-save, multi-theme, and mobile-friendly UI.
+- **Quick Operations**: Duplicate (Shift + drag), Merge/Split role-based nodes, Undo/Redo, Copy/Paste, and Select All.
 - **Export Capabilities**: Supports exporting to Excalidraw, PNG, Mermaid, and PDF formats.
-- **Quick Operations**: **Duplicate** (Shift + drag), **Merge/Split** of role-based nodes, **Undo/Redo**, **Copy/Paste**, and **Select All**.
-- **Multi-theme Support**: 5 themes available - Light, Dark, Warm, Dream, and CyberPunk to suit different visual preferences.
-- **Responsive Design**: Clean and modern user interface.
+
+## 🕹️ How to Operate
+
+1. **Add Components**: Drag nodes from the left Sidebar (`⌘/Ctrl + B`) or tap the canvas on mobile.
+2. **Connect Components**: Drag from a node's source handle (bottom/right) to another node's target handle (top/left).
+3. **Configure Parameters**: Use the **Params** panel to adjust the global system constraints (DAU, QPS, etc.) and trigger new capacity validations.
+4. **Practice or Demo**: Select a mock question from `Practice ▾` or load a preset architecture from `Demo ▾` in the top toolbar.
+5. **Review Feedback**: Check the live `N/45 rules passed` indicator. Clicking on a warning will highlight the problematic nodes.
 
 ### ⌨️ Keyboard Shortcuts
 
 | Shortcut | Action |
-|----------|--------|
+| ---------- | -------- |
 | `⌘/Ctrl + B` | Toggle component sidebar |
 | `⌘/Ctrl + A` | Select all nodes and edges |
 | `⌘/Ctrl + C` / `⌘/Ctrl + V` | Copy / Paste selection |
