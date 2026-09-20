@@ -74,9 +74,11 @@ function CanvasToolbar({
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center',
+        flexWrap: 'wrap',
         gap: 12,
         backgroundColor: 'var(--bg-primary)',
-        overflowX: isMobile ? 'auto' : undefined,
+        position: 'relative',
+        zIndex: 50,
       }}
     >
       {isMobile && (
@@ -147,8 +149,8 @@ function CanvasToolbar({
           </span>
         </div>
       )}
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-        <div ref={practiceRef} style={{ position: 'relative' }}>
+      <div style={{ marginLeft: 'auto', display: 'flex', flexWrap: 'wrap', justifyContent: 'flex-end', alignItems: 'center', gap: 12, flexShrink: 1 }}>
+        <div ref={practiceRef} style={{ position: 'relative', maxWidth: '100%' }}>
           <button
             onClick={() => setShowPractice(prev => !prev)}
             style={{
@@ -162,7 +164,11 @@ function CanvasToolbar({
               fontWeight: 400,
               fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
               cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+              boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+              maxWidth: isMobile ? '150px' : '300px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
             }}
           >
             {activePracticeId 
