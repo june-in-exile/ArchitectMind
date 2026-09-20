@@ -181,7 +181,7 @@ function CanvasToolbar({
             <div style={{
               position: 'absolute',
               top: '100%',
-              right: 0,
+              left: 0,
               marginTop: 6,
               minWidth: 130,
               borderRadius: 6,
